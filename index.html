@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Numilion - Jeux Gratuits</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="firebase.js"></script>
+</head>
+<body>
+
+  <div class="particles" id="particles"></div>
+
+  <nav>
+    <div class="nav-inner">
+      <span class="nav-logo"><img src="standard-2.gif" alt="Numilion" style="height:36px;vertical-align:middle;border-radius:50%"/> Numilion</span>
+      <div class="nav-links">
+        <a href="#jeux" class="nav-btn">Jeux</a>
+        <a href="login.html" class="nav-btn" id="nav-login-btn">Connexion</a>
+        <div id="nav-user"></div>
+      </div>
+    </div>
+  </nav>
+
+  <header>
+    <div class="logo">
+      <img src="standard-2.gif" alt="Numilion" style="width:90px;height:90px;border-radius:50%;margin-bottom:16px;filter:drop-shadow(0 0 20px rgba(255,160,0,0.5))"/>
+    </div>
+    <h1>Numilion</h1>
+    <p>Jeux gratuits directement dans ton navigateur</p>
+    <div class="header-line"></div>
+    <div class="header-stats">
+      <span id="hs-online">🟢 <b id="count-online">0</b> en ligne</span>
+      <span class="hs-sep">·</span>
+      <span>👁 <b id="count-visits">0</b> visites</span>
+    </div>
+  </header>
+
+  <main>
+    <section id="jeux">
+      <div class="search-wrap">
+        <input type="text" id="search-input" placeholder="🔍 Rechercher un jeu..." oninput="filterGames(this.value)"/>
+      </div>
+      <p class="section-title">🕹️ Tous les jeux</p>
+      <div id="custom-games-section">
+        <div class="games-grid" id="custom-games-grid">
+          <div class="empty-msg">Aucun jeu ajouté. Va dans le panel admin pour en ajouter.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer></footer>
+
+  <script src="script.js"></script>
+  <script>
+    (function() {
+      var session = JSON.parse(localStorage.getItem('numilion_session') || 'null');
+      if (!session) return;
+
+      var loginBtn = document.getElementById('nav-login-btn');
+      var navUser  = document.getElementById('nav-user');
+      if (loginBtn) loginBtn.style.display = 'none';
+
+      // Chercher la photo dans la session, sinon dans numilion_avatar (admin)
+      var avatar = session.avatar || (session.role === 'admin' ? localStorage.getItem('numilion_avatar') : null);
+      var avatarHTML = avatar ? '<img src="' + avatar + '" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>' : '👤';
+      var adminLink  = session.role === 'admin' ? '<a href="admin.html">Panel Admin</a>' : '';
+
+      navUser.innerHTML = '<div class="profile-wrap" id="profile-wrap">'
+        + '<div class="profile-avatar-btn" id="avatar-btn">' + avatarHTML + '</div>'
+        + '<div class="profile-dropdown" id="profile-dropdown">'
+        + '<div class="pd-name">👋 ' + session.user + '</div>'
+        + adminLink
+        + '<button class="pd-logout" onclick="localStorage.removeItem(\'numilion_session\');window.location.href=\'login.html\'">Déconnexion</button>'
+        + '</div></div>';
+
+      document.getElementById('avatar-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        document.getElementById('profile-dropdown').classList.toggle('open');
+      });
+
+      document.addEventListener('click', function() {
+        var dd = document.getElementById('profile-dropdown');
+        if (dd) dd.classList.remove('open');
+      });
+    })();
+  </script>
+</body>
+</html>

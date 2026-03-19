@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Numilion — Admin</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="firebase.js"></script>
+  <style>
+    .admin-page { max-width:860px; margin:0 auto; padding:30px 20px 60px; position:relative; z-index:1; }
+    .login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; }
+    .login-box { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:24px; padding:48px 40px; width:100%; max-width:400px; backdrop-filter:blur(12px); box-shadow:0 30px 80px rgba(0,0,0,0.5); }
+    .login-box .brand { font-size:1.8rem; font-weight:700; background:linear-gradient(135deg,#e94560,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .avatar-wrap { text-align:center; margin-bottom:28px; }
+    .avatar { width:90px; height:90px; border-radius:50%; margin:0 auto 12px; background:rgba(255,255,255,0.06); border:2px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:2.5rem; overflow:hidden; }
+    .avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .avatar-upload-btn { display:inline-block; padding:7px 18px; border-radius:50px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:0.82rem; cursor:pointer; }
+    .panel-avatar { width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,0.06); border:2px solid rgba(233,69,96,0.4); display:flex; align-items:center; justify-content:center; font-size:1.2rem; overflow:hidden; flex-shrink:0; }
+    .panel-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    label { display:block; color:#888; font-size:0.82rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+    input[type="text"], input[type="password"], input[type="url"] { width:100%; padding:12px 16px; border-radius:12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.95rem; margin-bottom:18px; font-family:inherit; transition:border-color 0.2s; }
+    input:focus { outline:none; border-color:#e94560; }
+    .btn-primary { width:100%; padding:13px; border-radius:50px; background:linear-gradient(135deg,#e94560,#a855f7); color:#fff; border:none; font-size:1rem; font-weight:600; cursor:pointer; font-family:inherit; }
+    .error-msg { color:#e94560; font-size:0.85rem; margin-bottom:14px; }
+    .panel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; padding-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .panel-header .brand { font-size:1.4rem; font-weight:700; background:linear-gradient(135deg,#e94560,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .panel-header-actions { display:flex; gap:10px; align-items:center; }
+    .btn-sm { padding:8px 18px; border-radius:50px; font-size:0.85rem; font-weight:600; cursor:pointer; border:none; font-family:inherit; transition:all 0.2s; }
+    .btn-outline { background:transparent; border:1px solid rgba(255,255,255,0.15); color:#aaa; }
+    .btn-outline:hover { background:rgba(255,255,255,0.08); color:#fff; }
+    .btn-danger { background:rgba(233,69,96,0.15); color:#e94560; border:1px solid rgba(233,69,96,0.3); }
+    .btn-danger:hover { background:#e94560; color:#fff; }
+    .stats { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:32px; }
+    .stat-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:20px; text-align:center; }
+    .stat-card .stat-num { font-size:2rem; font-weight:700; background:linear-gradient(135deg,#e94560,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .stat-card .stat-label { color:#666; font-size:0.8rem; margin-top:4px; }
+    .add-form { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:28px; margin-bottom:32px; }
+    .add-form h3 { font-size:1rem; color:#ccc; margin-bottom:20px; font-weight:600; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .form-full { grid-column:1/-1; }
+    .add-msg { font-size:0.88rem; margin-bottom:14px; padding:10px 16px; border-radius:10px; }
+    .add-msg.success { background:rgba(46,204,113,0.1); color:#2ecc71; border:1px solid rgba(46,204,113,0.2); }
+    .add-msg.error { background:rgba(233,69,96,0.1); color:#e94560; border:1px solid rgba(233,69,96,0.2); }
+    .list-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .list-header h3 { font-size:1rem; color:#ccc; font-weight:600; }
+    .game-item { display:flex; align-items:center; gap:16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:16px; margin-bottom:10px; }
+    .game-item:hover { border-color:rgba(233,69,96,0.3); }
+    .game-thumb { width:56px; height:56px; border-radius:12px; background:rgba(255,255,255,0.06); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.6rem; overflow:hidden; }
+    .game-thumb img { width:100%; height:100%; object-fit:cover; border-radius:12px; }
+    .game-info { flex:1; min-width:0; }
+    .game-info strong { display:block; font-size:0.95rem; color:#eee; margin-bottom:3px; }
+    .game-info span { font-size:0.8rem; color:#666; display:block; }
+    .game-meta { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+    .badge { display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,0.06); border-radius:50px; padding:4px 10px; font-size:0.78rem; color:#888; }
+    .badge.views { color:#a855f7; background:rgba(168,85,247,0.1); }
+    .badge.dl { color:#3b82f6; background:rgba(59,130,246,0.1); }
+    .game-actions { display:flex; gap:8px; margin-top:4px; }
+    .empty-list { text-align:center; color:#444; padding:40px; font-size:0.9rem; border:1px dashed rgba(255,255,255,0.07); border-radius:16px; }
+    .hidden { display:none !important; }
+  </style>
+</head>
+<body>
+  <div class="particles" id="particles"></div>
+
+  <div class="login-wrap" id="login-wrap">
+    <div class="login-box">
+      <div style="text-align:center;margin-bottom:20px">
+        <img src="standard-2.gif" style="width:72px;height:72px;border-radius:50%;filter:drop-shadow(0 0 16px rgba(255,160,0,0.6))"/>
+        <div class="brand" style="margin-top:10px">Numilion</div>
+        <p style="color:#666;font-size:0.9rem;margin-top:6px">Accès réservé à l'administrateur</p>
+      </div>
+      <div id="login-error" class="error-msg hidden"></div>
+      <div class="avatar-wrap">
+        <div class="avatar" id="avatar-preview">👤</div>
+        <label class="avatar-upload-btn" for="avatar-input">📷 Photo de profil</label>
+        <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="previewAvatar(this)"/>
+      </div>
+      <label>Nom d'utilisateur</label>
+      <input type="text" id="username" placeholder="ayoub"/>
+      <label>Mot de passe</label>
+      <input type="password" id="password" placeholder="••••••••"/>
+      <button class="btn-primary" onclick="login()">Se connecter</button>
+    </div>
+  </div>
+
+  <div class="admin-page hidden" id="panel">
+    <div class="panel-header">
+      <div class="brand"><img src="standard-2.gif" style="height:28px;vertical-align:middle;border-radius:50%;margin-right:8px"/>⚙️ Panel Admin</div>
+      <div class="panel-header-actions">
+        <div class="panel-avatar" id="panel-avatar">👤</div>
+        <a href="index.html"><button class="btn-sm btn-outline">🌐 Voir le site</button></a>
+        <button class="btn-sm btn-danger" onclick="logout()">Déconnexion</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Jeux</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-views">0</div><div class="stat-label">Vues</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-dl">0</div><div class="stat-label">Téléchargements</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-users">0</div><div class="stat-label">Comptes</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-online">0</div><div class="stat-label">En ligne</div></div>
+    </div>
+
+    <div class="add-form">
+      <h3>➕ Ajouter un jeu</h3>
+      <div id="add-msg" class="hidden"></div>
+      <div class="form-row">
+        <div class="form-full">
+          <label>Nom du jeu</label>
+          <input type="text" id="game-name" placeholder="Ex: Minecraft"/>
+        </div>
+        <div>
+          <label>Image (URL)</label>
+          <input type="url" id="game-img" placeholder="https://..."/>
+        </div>
+        <div>
+          <label>Lien de téléchargement</label>
+          <input type="url" id="game-dl" placeholder="https://..."/>
+        </div>
+        <div class="form-full">
+          <label>Description</label>
+          <input type="text" id="game-desc" placeholder="Courte description"/>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:auto;padding:12px 36px;margin-top:6px" onclick="addGame()">Ajouter</button>
+    </div>
+
+    <div class="list-header">
+      <h3>🕹️ Jeux (<span id="game-count">0</span>)</h3>
+    </div>
+    <div id="game-list"></div>
+  </div>
+
+  <script>
+    const ADMIN_USER = 'ayoub';
+    const ADMIN_PASS = 'Louly2010@';
+
+    function previewAvatar(input) {
+      if (!input.files || !input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        localStorage.setItem('numilion_avatar', e.target.result);
+        const session = JSON.parse(localStorage.getItem('numilion_session') || 'null');
+        if (session && session.role === 'admin') {
+          session.avatar = e.target.result;
+          localStorage.setItem('numilion_session', JSON.stringify(session));
+        }
+        setAvatar(e.target.result);
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    function setAvatar(src) {
+      const img = '<img src="'+src+'" alt="avatar"/>';
+      const p = document.getElementById('avatar-preview');
+      const pa = document.getElementById('panel-avatar');
+      if (p) p.innerHTML = img;
+      if (pa) pa.innerHTML = img;
+    }
+
+    const savedAvatar = localStorage.getItem('numilion_avatar');
+    if (savedAvatar) setAvatar(savedAvatar);
+
+    function login() {
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
+      if (u === ADMIN_USER && p === ADMIN_PASS) {
+        const avatar = localStorage.getItem('numilion_avatar') || null;
+        localStorage.setItem('numilion_session', JSON.stringify({ user: ADMIN_USER, role: 'admin', avatar }));
+        document.getElementById('login-wrap').classList.add('hidden');
+        document.getElementById('panel').classList.remove('hidden');
+        startPanel();
+      } else {
+        const err = document.getElementById('login-error');
+        err.textContent = 'Identifiants incorrects.';
+        err.classList.remove('hidden');
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('numilion_session');
+      window.location.href = 'login.html';
+    }
+
+    function showMsg(el, type, text) {
+      el.className = 'add-msg ' + type;
+      el.textContent = text;
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 3000);
+    }
+
+    function addGame() {
+      const name = document.getElementById('game-name').value.trim();
+      const img  = document.getElementById('game-img').value.trim();
+      const dl   = document.getElementById('game-dl').value.trim();
+      const desc = document.getElementById('game-desc').value.trim();
+      const msg  = document.getElementById('add-msg');
+      if (!name) { showMsg(msg, 'error', 'Le nom est obligatoire.'); return; }
+      const game = { id: Date.now(), name, img, dl, desc, views: 0, downloads: 0 };
+      saveGameToFirebase(game);
+      showMsg(msg, 'success', '"'+name+'" ajouté !');
+      ['game-name','game-img','game-dl','game-desc'].forEach(id => document.getElementById(id).value = '');
+    }
+
+    function deleteGame(id) {
+      if (!confirm('Supprimer ce jeu ?')) return;
+      deleteGameFromFirebase(id);
+    }
+
+    function incrementDl(id) { updateGameStatFirebase(id, 'downloads'); }
+
+    function startPanel() {
+      // Stats en temps réel
+      db.ref('online').on('value', snap => {
+        document.getElementById('stat-online').textContent = snap.numChildren();
+      });
+      countUsersFirebase(n => document.getElementById('stat-users').textContent = n);
+
+      // Jeux en temps réel
+      loadGamesFromFirebase(function(games) {
+        const totalViews = games.reduce((s,g) => s+(g.views||0), 0);
+        const totalDl    = games.reduce((s,g) => s+(g.downloads||0), 0);
+        document.getElementById('stat-total').textContent = games.length;
+        document.getElementById('stat-views').textContent = totalViews;
+        document.getElementById('stat-dl').textContent    = totalDl;
+        document.getElementById('game-count').textContent = games.length;
+
+        const list = document.getElementById('game-list');
+        if (!games.length) { list.innerHTML = '<div class="empty-list">Aucun jeu ajouté.</div>'; return; }
+        list.innerHTML = games.map(g => `
+          <div class="game-item">
+            <div class="game-thumb">${g.img ? `<img src="${g.img}" onerror="this.parentElement.textContent='🎮'"/>` : '🎮'}</div>
+            <div class="game-info">
+              <strong>${g.name}</strong>
+              <span>${g.desc||''}</span>
+            </div>
+            <div class="game-meta">
+              <div style="display:flex;gap:6px">
+                <span class="badge views">👁 ${g.views||0}</span>
+                <span class="badge dl">⬇️ ${g.downloads||0}</span>
+              </div>
+              <div class="game-actions">
+                ${g.dl ? `<button class="btn-sm" style="background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3)" onclick="window.open('${g.dl}','_blank');incrementDl(${g.id})">⬇️ DL</button>` : ''}
+                <button class="btn-sm btn-danger" onclick="deleteGame(${g.id})">🗑</button>
+              </div>
+            </div>
+          </div>`).join('');
+      });
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !document.getElementById('login-wrap').classList.contains('hidden')) login();
+    });
+
+    // Auto-login si session admin active
+    (function() {
+      const session = JSON.parse(localStorage.getItem('numilion_session') || 'null');
+      if (session && session.role === 'admin') {
+        const avatar = localStorage.getItem('numilion_avatar') || session.avatar;
+        if (avatar) { session.avatar = avatar; localStorage.setItem('numilion_session', JSON.stringify(session)); setAvatar(avatar); }
+        document.getElementById('login-wrap').classList.add('hidden');
+        document.getElementById('panel').classList.remove('hidden');
+        startPanel();
+      }
+    })();
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>
