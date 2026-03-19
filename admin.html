@@ -211,6 +211,30 @@
 
     function incrementDl(id) { updateGameStatFirebase(id, 'downloads'); }
 
+    function editGame(g) {
+      const item = document.getElementById('item-' + g.id);
+      item.innerHTML = `
+        <div style="flex:1;display:flex;flex-direction:column;gap:10px">
+          <input type="text" id="edit-name-${g.id}" value="${g.name}" placeholder="Nom" style="padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:inherit;font-size:0.9rem"/>
+          <input type="text" id="edit-img-${g.id}" value="${g.img||''}" placeholder="URL image" style="padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:inherit;font-size:0.9rem"/>
+          <input type="text" id="edit-dl-${g.id}" value="${g.dl||''}" placeholder="Lien téléchargement" style="padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:inherit;font-size:0.9rem"/>
+          <input type="text" id="edit-desc-${g.id}" value="${g.desc||''}" placeholder="Description" style="padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:inherit;font-size:0.9rem"/>
+          <div style="display:flex;gap:8px">
+            <button class="btn-sm btn-primary" style="background:linear-gradient(135deg,#e94560,#a855f7);color:#fff;border:none" onclick="saveEdit(${g.id})">✅ Sauvegarder</button>
+            <button class="btn-sm btn-outline" onclick="startPanel()">Annuler</button>
+          </div>
+        </div>`;
+    }
+
+    function saveEdit(id) {
+      const name = document.getElementById('edit-name-'+id).value.trim();
+      const img  = document.getElementById('edit-img-'+id).value.trim();
+      const dl   = document.getElementById('edit-dl-'+id).value.trim();
+      const desc = document.getElementById('edit-desc-'+id).value.trim();
+      if (!name) return;
+      db.ref('games/'+id).update({ name, img, dl, desc });
+    }
+
     function startPanel() {
       // Stats en temps réel
       db.ref('online').on('value', snap => {
@@ -230,7 +254,7 @@
         const list = document.getElementById('game-list');
         if (!games.length) { list.innerHTML = '<div class="empty-list">Aucun jeu ajouté.</div>'; return; }
         list.innerHTML = games.map(g => `
-          <div class="game-item">
+          <div class="game-item" id="item-${g.id}">
             <div class="game-thumb">${g.img ? `<img src="${g.img}" onerror="this.parentElement.textContent='🎮'"/>` : '🎮'}</div>
             <div class="game-info">
               <strong>${g.name}</strong>
@@ -242,7 +266,7 @@
                 <span class="badge dl">⬇️ ${g.downloads||0}</span>
               </div>
               <div class="game-actions">
-                ${g.dl ? `<button class="btn-sm" style="background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3)" onclick="window.open('${g.dl}','_blank');incrementDl(${g.id})">⬇️ DL</button>` : ''}
+                <button class="btn-sm" style="background:rgba(168,85,247,0.15);color:#a855f7;border:1px solid rgba(168,85,247,0.3)" onclick='editGame(${JSON.stringify(g)})'>✏️ Modifier</button>
                 <button class="btn-sm btn-danger" onclick="deleteGame(${g.id})">🗑</button>
               </div>
             </div>
