@@ -69,9 +69,14 @@
           + '</div>'
           + '<h2>' + g.name + '</h2>'
           + '<p>' + (g.desc || '') + '</p>'
-          + (g.dl ? '<button onclick="window.open(\'' + g.dl + '\',\'_blank\')">⬇️ Telecharger</button>' : '')
+          + (g.dl ? '<button class="dl-btn" data-url="' + g.dl + '">⬇️ Telecharger</button>' : '')
           + '</div>';
       }).join('');
+      document.querySelectorAll('.dl-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          window.open(this.getAttribute('data-url'), '_blank');
+        });
+      });
     });
     trackVisit();
   </script>
