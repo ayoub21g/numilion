@@ -161,7 +161,8 @@ main {
   line-height: 1.5;
 }
 
-.game-card button {
+.game-card button, .game-card .dl-btn {
+  display: inline-block;
   background: transparent;
   color: #e94560;
   border: 2px solid #e94560;
@@ -172,8 +173,9 @@ main {
   cursor: pointer;
   transition: all 0.2s;
   letter-spacing: 0.3px;
+  text-decoration: none;
 }
-.game-card button:hover { background: #e94560; color: #fff; transform: scale(1.04); }
+.game-card button:hover, .game-card .dl-btn:hover { background: #e94560; color: #fff; transform: scale(1.04); }
 
 /* ── Modal ── */
 .modal {
