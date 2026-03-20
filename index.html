@@ -58,6 +58,18 @@
     </section>
   </main>
 
+  <!-- Modal connexion obligatoire -->
+  <div id="login-required-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
+    <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px 36px;width:100%;max-width:380px;text-align:center;position:relative">
+      <button onclick="document.getElementById('login-required-modal').style.display='none'" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#666;font-size:1.3rem;cursor:pointer">✕</button>
+      <div style="font-size:3rem;margin-bottom:16px">🔒</div>
+      <h3 style="font-size:1.2rem;font-weight:700;color:#fff;margin-bottom:12px">Compte requis</h3>
+      <p style="color:#888;font-size:0.9rem;margin-bottom:24px;line-height:1.6">Tu dois avoir un compte pour télécharger des jeux. C'est gratuit et rapide !</p>
+      <a href="login.html" style="display:block;padding:13px;border-radius:50px;background:linear-gradient(135deg,#e94560,#a855f7);color:#fff;font-weight:700;font-size:1rem;text-decoration:none;margin-bottom:10px">Se connecter / S'inscrire</a>
+      <button onclick="document.getElementById('login-required-modal').style.display='none'" style="background:none;border:none;color:#555;font-size:0.85rem;cursor:pointer;font-family:inherit">Annuler</button>
+    </div>
+  </div>
+
   <!-- Modal demande de jeu -->
   <div id="request-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
     <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:36px;width:100%;max-width:420px;position:relative">
@@ -204,6 +216,14 @@
   })();
   </script>
   <script>
+    function checkLogin(e, el) {
+      var session = JSON.parse(localStorage.getItem('numilion_session') || 'null');
+      if (session) return true; // connecté, laisser passer
+      e.preventDefault();
+      document.getElementById('login-required-modal').style.display = 'flex';
+      return false;
+    }
+
     function submitRequest() {
       var name = document.getElementById('req-name').value.trim();
       var img  = document.getElementById('req-img').value.trim();
@@ -241,7 +261,7 @@
           + '</div>'
           + '<h2>' + g.name + '</h2>'
           + '<p>' + (g.desc || '') + '</p>'
-          + (g.dl ? '<a href="' + g.dl + '" class="dl-btn">⬇️ Telecharger</a>' : '')
+          + (g.dl ? '<a href="' + g.dl + '" class="dl-btn" onclick="return checkLogin(event, this)">⬇️ Telecharger</a>' : '')
           + '</div>';
       }).join('');
     });
