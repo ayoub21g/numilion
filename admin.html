@@ -265,8 +265,20 @@
     }
 
     function acceptRequest(id, name, img) {
-      db.ref('requests/'+id).update({ status: 'accepted' });
-      // Pré-remplir le formulaire d'ajout
+      db.ref('requests/'+id).once('value').then(function(snap) {
+        var r = snap.val();
+        db.ref('requests/'+id).update({ status: 'accepted' });
+        // Notifier l'utilisateur
+        if (r && r.user && r.user !== 'Visiteur') {
+          db.ref('notifications/' + r.user).push({
+            type: 'accepte',
+            game: name,
+            comment: 'Ton jeu sera bientôt disponible sur le site !',
+            date: new Date().toLocaleDateString('fr-FR'),
+            read: false
+          });
+        }
+      });
       document.getElementById('game-name').value = name;
       document.getElementById('game-img').value = img || '';
       document.getElementById('game-dl').value = '';
