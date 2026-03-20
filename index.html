@@ -95,50 +95,58 @@
     var c = document.getElementById('wave-canvas');
     var ctx = c.getContext('2d');
     var t = 0;
-    function resize() { c.width = window.innerWidth; c.height = window.innerHeight; }
+    var lines = [];
+    function resize() {
+      c.width = window.innerWidth;
+      c.height = window.innerHeight;
+      initLines();
+    }
+    function initLines() {
+      lines = [];
+      var count = 120;
+      for (var i = 0; i < count; i++) {
+        lines.push({
+          angle: (Math.PI * 2 / count) * i,
+          speed: 0.8 + Math.random() * 2.5,
+          len: 0.3 + Math.random() * 0.7,
+          width: 0.5 + Math.random() * 2,
+          offset: Math.random() * 100
+        });
+      }
+    }
     resize();
     window.addEventListener('resize', resize);
 
-    function noise(x, y, z) {
-      var X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
-      x -= Math.floor(x); y -= Math.floor(y);
-      var u = fade(x), v = fade(y);
-      return lerp(v,
-        lerp(u, grad(p[X+p[Y]], x, y), grad(p[X+1+p[Y]], x-1, y)),
-        lerp(u, grad(p[X+p[Y+1]], x, y-1), grad(p[X+1+p[Y+1]], x-1, y-1))
-      ) * 0.5 + 0.5;
-    }
-    function fade(t) { return t*t*t*(t*(t*6-15)+10); }
-    function lerp(t,a,b) { return a+t*(b-a); }
-    function grad(h,x,y) { h&=3; return ((h&1)?-x:x)+((h&2)?-y:y); }
-    var p = [];
-    for(var i=0;i<256;i++) p[i]=i;
-    for(var i=255;i>0;i--) { var j=Math.floor(Math.random()*(i+1)); var tmp=p[i]; p[i]=p[j]; p[j]=tmp; }
-    p = p.concat(p);
-
     function draw() {
       var w = c.width, h = c.height;
-      var img = ctx.createImageData(w, h);
-      var d = img.data;
-      var scale = 3.5;
-      for (var y = 0; y < h; y++) {
-        for (var x = 0; x < w; x++) {
-          var nx = x / w * scale;
-          var ny = y / h * scale;
-          var n = noise(nx + t*0.15, ny + t*0.08);
-          n += 0.5 * noise(nx*2 + t*0.2, ny*2 + t*0.12);
-          n += 0.25 * noise(nx*4 + t*0.25, ny*4 + t*0.18);
-          n = n / 1.75;
-          var v = Math.floor(n * n * 60);
-          var idx = (y * w + x) * 4;
-          d[idx]   = v;
-          d[idx+1] = v;
-          d[idx+2] = v;
-          d[idx+3] = 255;
-        }
-      }
-      ctx.putImageData(img, 0, 0);
-      t += 0.004;
+      var cx = w / 2, cy = h / 2;
+      var maxR = Math.sqrt(cx*cx + cy*cy);
+
+      ctx.fillStyle = '#0d0d0d';
+      ctx.fillRect(0, 0, w, h);
+
+      lines.forEach(function(l) {
+        var progress = ((t * l.speed + l.offset) % 100) / 100;
+        var r1 = maxR * progress * 0.3;
+        var r2 = maxR * (progress * 0.3 + l.len * 0.25);
+        var alpha = Math.sin(progress * Math.PI) * 0.35;
+
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(l.angle) * r1, cy + Math.sin(l.angle) * r1);
+        ctx.lineTo(cx + Math.cos(l.angle) * r2, cy + Math.sin(l.angle) * r2);
+        ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
+        ctx.lineWidth = l.width;
+        ctx.stroke();
+      });
+
+      // Cercle central sombre
+      var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 0.5);
+      grad.addColorStop(0, 'rgba(13,13,13,0.85)');
+      grad.addColorStop(1, 'rgba(13,13,13,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      t += 0.3;
       requestAnimationFrame(draw);
     }
     draw();
