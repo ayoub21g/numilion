@@ -20,6 +20,13 @@
         <button onclick="document.getElementById('request-modal').style.display='flex'" class="nav-btn" style="cursor:pointer;border:none;background:rgba(233,69,96,0.15);color:#e94560;border:1px solid rgba(233,69,96,0.3)">🎮 Demander un jeu</button>
         <a href="login.html" class="nav-btn" id="nav-login-btn">Connexion</a>
         <div id="nav-user"></div>
+        <div id="nav-notif" style="display:none;position:relative">
+          <button id="notif-btn" style="background:none;border:none;cursor:pointer;font-size:1.3rem;position:relative;padding:4px" onclick="toggleNotif()">🔔<span id="notif-badge" style="display:none;position:absolute;top:0;right:0;background:#e94560;color:#fff;font-size:0.6rem;font-weight:700;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center"></span></button>
+          <div id="notif-dropdown" style="display:none;position:absolute;top:48px;right:0;background:#1c1c1c;border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:12px;min-width:280px;z-index:200;box-shadow:0 16px 40px rgba(0,0,0,0.5)">
+            <div style="font-size:0.85rem;font-weight:600;color:#eee;margin-bottom:10px">🔔 Notifications</div>
+            <div id="notif-list"><div style="color:#555;font-size:0.85rem;text-align:center;padding:10px">Aucune notification</div></div>
+          </div>
+        </div>
       </div>
     </div>
   </nav>
@@ -90,6 +97,53 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="firebase.js"></script>
   <script src="script.js"></script>
+  <script>
+    // ── NOTIFICATIONS ─────────────────────────────────────
+    function toggleNotif() {
+      var dd = document.getElementById('notif-dropdown');
+      dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+    }
+    document.addEventListener('click', function(e) {
+      if (!document.getElementById('nav-notif').contains(e.target)) {
+        var dd = document.getElementById('notif-dropdown');
+        if (dd) dd.style.display = 'none';
+      }
+    });
+    (function loadNotifications() {
+      var session = JSON.parse(localStorage.getItem('numilion_session') || 'null');
+      if (!session || session.role === 'admin') return;
+      document.getElementById('nav-notif').style.display = 'block';
+      firebase.database().ref('notifications/' + session.user).on('value', function(snap) {
+        var notifs = [];
+        snap.forEach(function(c) { notifs.push({ key: c.key, val: c.val() }); });
+        var unread = notifs.filter(function(n) { return !n.val.read; }).length;
+        var badge = document.getElementById('notif-badge');
+        if (unread > 0) {
+          badge.style.display = 'flex';
+          badge.textContent = unread;
+        } else {
+          badge.style.display = 'none';
+        }
+        var list = document.getElementById('notif-list');
+        if (!notifs.length) {
+          list.innerHTML = '<div style="color:#555;font-size:0.85rem;text-align:center;padding:10px">Aucune notification</div>';
+          return;
+        }
+        list.innerHTML = notifs.reverse().map(function(n) {
+          var v = n.val;
+          return '<div style="padding:10px;border-radius:10px;background:rgba(233,69,96,0.08);border:1px solid rgba(233,69,96,0.15);margin-bottom:8px">'
+            + '<div style="font-size:0.85rem;color:#eee;font-weight:600">❌ Demande refusée : ' + v.game + '</div>'
+            + '<div style="font-size:0.78rem;color:#888;margin-top:4px">Raison : ' + v.comment + '</div>'
+            + '<div style="font-size:0.72rem;color:#555;margin-top:4px">' + v.date + '</div>'
+            + '</div>';
+        }).join('');
+        // Marquer comme lues
+        notifs.forEach(function(n) {
+          if (!n.val.read) firebase.database().ref('notifications/' + session.user + '/' + n.key).update({ read: true });
+        });
+      });
+    })();
+  </script>
   <script>
   (function() {
     var c = document.getElementById('wave-canvas');

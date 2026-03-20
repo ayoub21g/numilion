@@ -274,9 +274,19 @@
       document.getElementById('game-name').scrollIntoView({ behavior: 'smooth' });
     }
 
-    function rejectRequest(id) {
+    function rejectRequest(id, username, gameName) {
       var comment = prompt('Raison du refus (optionnel) :') || '';
       db.ref('requests/'+id).update({ status: 'rejected', comment: comment });
+      // Envoyer notification à l'utilisateur
+      if (username && username !== 'Visiteur') {
+        db.ref('notifications/' + username).push({
+          type: 'refus',
+          game: gameName,
+          comment: comment || 'Aucune raison fournie.',
+          date: new Date().toLocaleDateString('fr-FR'),
+          read: false
+        });
+      }
     }
 
     function startPanel() {
@@ -338,7 +348,7 @@
             + '<div class="game-meta"><div>'+statusBadge+'</div>'
             + (r.status==='pending' ? '<div class="game-actions">'
               + '<button class="btn-sm" style="background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.3)" onclick="acceptRequest('+r.id+',\''+r.name+'\',\''+r.img+'\')">✅ Accepter</button>'
-              + '<button class="btn-sm btn-danger" onclick="rejectRequest('+r.id+')">❌ Refuser</button>'
+              + '<button class="btn-sm btn-danger" onclick="rejectRequest('+r.id+',\''+r.user+'\',\''+r.name+'\')">❌ Refuser</button>'
               + '</div>' : '')
             + '</div></div>';
         }).join('');
