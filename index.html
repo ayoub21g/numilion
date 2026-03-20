@@ -102,13 +102,13 @@
     function draw() {
       var w = c.width, h = c.height;
       ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = '#0a0a0a';
+      ctx.fillStyle = '#111111';
       ctx.fillRect(0, 0, w, h);
       var layers = [
-        { amp: 0.18, freq: 0.8, speed: 0.4, bright: 28 },
-        { amp: 0.14, freq: 1.2, speed: 0.6, bright: 22 },
-        { amp: 0.10, freq: 1.8, speed: 0.9, bright: 18 },
-        { amp: 0.07, freq: 2.4, speed: 1.2, bright: 14 },
+        { amp: 0.20, freq: 0.8, speed: 0.4, bright: 55 },
+        { amp: 0.16, freq: 1.2, speed: 0.6, bright: 42 },
+        { amp: 0.12, freq: 1.8, speed: 0.9, bright: 35 },
+        { amp: 0.08, freq: 2.4, speed: 1.2, bright: 28 },
       ];
       layers.forEach(function(l) {
         ctx.beginPath();
