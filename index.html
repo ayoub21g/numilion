@@ -17,7 +17,6 @@
       <span class="nav-logo"><img src="standard-2.gif" alt="Numilion" style="height:36px;vertical-align:middle;border-radius:50%"/> Numilion</span>
       <div class="nav-links">
         <a href="#jeux" class="nav-btn">Jeux</a>
-        <a href="#nouveautes" class="nav-btn">Nouveautés</a>
         <button onclick="document.getElementById('request-modal').style.display='flex'" class="nav-btn" style="cursor:pointer;border:none;background:rgba(233,69,96,0.15);color:#e94560;border:1px solid rgba(233,69,96,0.3)">🎮 Demander un jeu</button>
         <a href="login.html" class="nav-btn" id="nav-login-btn">Connexion</a>
         <div id="nav-user"></div>
@@ -55,13 +54,6 @@
         <div class="games-grid" id="custom-games-grid">
           <div class="empty-msg">Aucun jeu ajouté. Va dans le panel admin pour en ajouter.</div>
         </div>
-      </div>
-    </section>
-
-    <section id="nouveautes" style="margin-top:60px">
-      <p class="section-title">🆕 Nouveautés</p>
-      <div class="games-grid" id="nouveautes-grid">
-        <div class="empty-msg">Aucune nouveauté.</div>
       </div>
     </section>
   </main>
@@ -275,11 +267,6 @@
       }
 
       grid.innerHTML = games.map(makeCard).join('');
-
-      // Nouveautés = 10 derniers jeux ajoutés (triés par id décroissant)
-      var recent = games.slice().sort(function(a,b){ return b.id - a.id; }).slice(0, 10);
-      var newGrid = document.getElementById('nouveautes-grid');
-      if (recent.length) newGrid.innerHTML = recent.map(makeCard).join('');
     });
     trackVisit();
   </script>
