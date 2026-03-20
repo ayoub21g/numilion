@@ -125,6 +125,7 @@ main {
   opacity: 0;
   transition: opacity 0.3s;
   border-radius: 20px;
+  pointer-events: none;
 }
 
 .game-card:hover::before { opacity: 1; }
