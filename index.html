@@ -102,7 +102,7 @@
       if (loginBtn) loginBtn.style.display = 'none';
 
       // Chercher la photo dans la session, sinon dans numilion_avatar (admin)
-      var avatar = session.avatar || (session.role === 'admin' ? localStorage.getItem('numilion_avatar') : null);
+      var avatar = session.avatar || (session.role === 'admin' ? (localStorage.getItem('numilion_avatar') || 'https://i.imgur.com/lRqkh3u.jpeg') : null);
       var avatarHTML = avatar ? '<img src="' + avatar + '" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>' : '👤';
       var adminLink  = session.role === 'admin' ? '<a href="admin.html">Panel Admin</a>' : '';
 

@@ -160,14 +160,15 @@
       if (pa) pa.innerHTML = img;
     }
 
-    const savedAvatar = localStorage.getItem('numilion_avatar');
+    const ADMIN_AVATAR = 'https://i.imgur.com/lRqkh3u.jpeg';
+    const savedAvatar = localStorage.getItem('numilion_avatar') || ADMIN_AVATAR;
     if (savedAvatar) setAvatar(savedAvatar);
 
     function login() {
       const u = document.getElementById('username').value;
       const p = document.getElementById('password').value;
       if (u === ADMIN_USER && p === ADMIN_PASS) {
-        const avatar = localStorage.getItem('numilion_avatar') || null;
+        const avatar = localStorage.getItem('numilion_avatar') || 'https://i.imgur.com/lRqkh3u.jpeg';
         localStorage.setItem('numilion_session', JSON.stringify({ user: ADMIN_USER, role: 'admin', avatar }));
         document.getElementById('login-wrap').classList.add('hidden');
         document.getElementById('panel').classList.remove('hidden');
