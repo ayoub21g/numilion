@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Numilion — Mon Profil</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="firebase.js"></script>
+  <style>
+    .profil-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; position:relative; z-index:1; padding:20px; }
+    .profil-box { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:24px; padding:40px 36px; width:100%; max-width:440px; backdrop-filter:blur(12px); box-shadow:0 30px 80px rgba(0,0,0,0.5); }
+    .profil-title { font-size:1.3rem; font-weight:700; background:linear-gradient(135deg,#e94560,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:28px; }
+    .avatar-wrap { text-align:center; margin-bottom:28px; }
+    .avatar-preview { width:90px; height:90px; border-radius:50%; margin:0 auto 12px; background:rgba(255,255,255,0.06); border:2px solid rgba(233,69,96,0.4); display:flex; align-items:center; justify-content:center; font-size:2.5rem; overflow:hidden; cursor:pointer; }
+    .avatar-preview img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .avatar-pick-btn { display:inline-block; padding:7px 18px; border-radius:50px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:0.82rem; cursor:pointer; }
+    label { display:block; color:#888; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+    input[type="text"], input[type="password"] { width:100%; padding:12px 16px; border-radius:12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.95rem; margin-bottom:16px; font-family:inherit; transition:border-color 0.2s; }
+    input:focus { outline:none; border-color:#e94560; }
+    .btn-save { width:100%; padding:13px; border-radius:50px; background:linear-gradient(135deg,#e94560,#a855f7); color:#fff; border:none; font-size:1rem; font-weight:600; cursor:pointer; font-family:inherit; margin-top:4px; }
+    .btn-back { display:inline-block; margin-bottom:20px; color:#666; font-size:0.85rem; text-decoration:none; }
+    .btn-back:hover { color:#e94560; }
+    .msg { font-size:0.85rem; padding:10px 14px; border-radius:10px; margin-bottom:14px; }
+    .msg.success { background:rgba(46,204,113,0.1); color:#2ecc71; border:1px solid rgba(46,204,113,0.2); }
+    .msg.error { background:rgba(233,69,96,0.1); color:#e94560; border:1px solid rgba(233,69,96,0.2); }
+    .hidden { display:none !important; }
+  </style>
+</head>
+<body>
+  <div class="particles" id="particles"></div>
+  <div class="profil-wrap">
+    <div class="profil-box">
+      <a href="index.html" class="btn-back">← Retour au site</a>
+      <div class="profil-title">👤 Mon Profil</div>
+      <div id="msg-box" class="msg hidden"></div>
+
+      <div class="avatar-wrap">
+        <div class="avatar-preview" id="avatar-preview" onclick="document.getElementById('avatar-input').click()">👤</div>
+        <label class="avatar-pick-btn" for="avatar-input">📷 Changer la photo</label>
+        <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="previewAvatar(this)"/>
+      </div>
+
+      <label>Nom d'utilisateur</label>
+      <input type="text" id="new-user" placeholder="Nouveau pseudo"/>
+
+      <label>Nouveau mot de passe</label>
+      <input type="password" id="new-pass" placeholder="Laisser vide pour ne pas changer"/>
+
+      <label>Confirmer le mot de passe</label>
+      <input type="password" id="confirm-pass" placeholder="Confirmer le nouveau mot de passe"/>
+
+      <button class="btn-save" onclick="saveProfile()">💾 Sauvegarder</button>
+    </div>
+  </div>
+
+  <script>
+    var session = JSON.parse(localStorage.getItem('numilion_session') || 'null');
+    if (!session || session.role === 'admin') window.location.href = 'index.html';
+
+    var newAvatarData = null;
+
+    // Pré-remplir
+    document.getElementById('new-user').value = session.user;
+    if (session.avatar) {
+      document.getElementById('avatar-preview').innerHTML = '<img src="'+session.avatar+'"/>';
+    }
+
+    function previewAvatar(input) {
+      if (!input.files[0]) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        newAvatarData = e.target.result;
+        document.getElementById('avatar-preview').innerHTML = '<img src="'+newAvatarData+'"/>';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    function showMsg(type, text) {
+      var el = document.getElementById('msg-box');
+      el.className = 'msg ' + type;
+      el.textContent = text;
+      el.classList.remove('hidden');
+    }
+
+    function saveProfile() {
+      var newUser = document.getElementById('new-user').value.trim();
+      var newPass = document.getElementById('new-pass').value;
+      var confirmPass = document.getElementById('confirm-pass').value;
+
+      if (!newUser) { showMsg('error', 'Le pseudo ne peut pas être vide.'); return; }
+      if (newPass && newPass !== confirmPass) { showMsg('error', 'Les mots de passe ne correspondent pas.'); return; }
+      if (newPass && newPass.length < 4) { showMsg('error', 'Mot de passe trop court (min 4 caractères).'); return; }
+
+      var avatar = newAvatarData || session.avatar;
+
+      // Si le pseudo change, vérifier qu'il n'est pas pris
+      function doSave(pass) {
+        var updates = { user: newUser, avatar: avatar || null };
+        if (pass) updates.pass = pass;
+
+        // Si le pseudo change, supprimer l'ancien et créer le nouveau
+        if (newUser !== session.user) {
+          getUserFromFirebase(newUser, function(existing) {
+            if (existing) { showMsg('error', 'Ce pseudo est déjà pris.'); return; }
+            db.ref('users/' + session.user).once('value', function(snap) {
+              var old = snap.val();
+              db.ref('users/' + session.user).remove();
+              db.ref('users/' + newUser).set(Object.assign({}, old, updates));
+              updateSession(newUser, pass || old.pass, avatar);
+            });
+          });
+        } else {
+          db.ref('users/' + session.user).update(updates);
+          updateSession(newUser, pass || session.pass, avatar);
+        }
+      }
+
+      if (newPass) {
+        doSave(newPass);
+      } else {
+        getUserFromFirebase(session.user, function(u) {
+          doSave(u ? u.pass : '');
+        });
+      }
+    }
+
+    function updateSession(user, pass, avatar) {
+      var newSession = { user: user, role: 'user', avatar: avatar || null };
+      localStorage.setItem('numilion_session', JSON.stringify(newSession));
+      session = newSession;
+      showMsg('success', 'Profil mis à jour !');
+    }
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -266,6 +266,7 @@
         + '<div class="profile-dropdown" id="profile-dropdown">'
         + '<div class="pd-name">👋 ' + session.user + '</div>'
         + adminLink
+        + (session.role !== 'admin' ? '<a href="profil.html">⚙️ Mon Profil</a>' : '')
         + '<button class="pd-logout" onclick="localStorage.removeItem(\'numilion_session\');window.location.href=\'login.html\'">Déconnexion</button>'
         + '</div></div>';
 
