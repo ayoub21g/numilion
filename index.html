@@ -127,9 +127,9 @@
 
       lines.forEach(function(l) {
         var progress = ((t * l.speed + l.offset) % 100) / 100;
-        var r1 = maxR * progress * 0.3;
-        var r2 = maxR * (progress * 0.3 + l.len * 0.25);
-        var alpha = Math.sin(progress * Math.PI) * 0.35;
+        var r1 = maxR * progress;
+        var r2 = maxR * (progress + l.len * 0.15);
+        var alpha = Math.sin(progress * Math.PI) * 0.5;
 
         ctx.beginPath();
         ctx.moveTo(cx + Math.cos(l.angle) * r1, cy + Math.sin(l.angle) * r1);
@@ -138,13 +138,6 @@
         ctx.lineWidth = l.width;
         ctx.stroke();
       });
-
-      // Cercle central sombre
-      var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 0.5);
-      grad.addColorStop(0, 'rgba(13,13,13,0.85)');
-      grad.addColorStop(1, 'rgba(13,13,13,0)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, w, h);
 
       t += 0.3;
       requestAnimationFrame(draw);
