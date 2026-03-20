@@ -91,7 +91,6 @@
   <script src="firebase.js"></script>
   <script src="script.js"></script>
   <script>
-  // ── FOND VAGUES NOIR ──────────────────────────────────
   (function() {
     var c = document.getElementById('wave-canvas');
     var ctx = c.getContext('2d');
@@ -99,38 +98,47 @@
     function resize() { c.width = window.innerWidth; c.height = window.innerHeight; }
     resize();
     window.addEventListener('resize', resize);
+
+    function noise(x, y, z) {
+      var X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
+      x -= Math.floor(x); y -= Math.floor(y);
+      var u = fade(x), v = fade(y);
+      return lerp(v,
+        lerp(u, grad(p[X+p[Y]], x, y), grad(p[X+1+p[Y]], x-1, y)),
+        lerp(u, grad(p[X+p[Y+1]], x, y-1), grad(p[X+1+p[Y+1]], x-1, y-1))
+      ) * 0.5 + 0.5;
+    }
+    function fade(t) { return t*t*t*(t*(t*6-15)+10); }
+    function lerp(t,a,b) { return a+t*(b-a); }
+    function grad(h,x,y) { h&=3; return ((h&1)?-x:x)+((h&2)?-y:y); }
+    var p = [];
+    for(var i=0;i<256;i++) p[i]=i;
+    for(var i=255;i>0;i--) { var j=Math.floor(Math.random()*(i+1)); var tmp=p[i]; p[i]=p[j]; p[j]=tmp; }
+    p = p.concat(p);
+
     function draw() {
       var w = c.width, h = c.height;
-      ctx.fillStyle = '#0d0d0d';
-      ctx.fillRect(0, 0, w, h);
-
-      for (var i = 0; i < 6; i++) {
-        ctx.beginPath();
-        var yBase = h * (0.2 + i * 0.15);
-        var amp   = h * (0.25 - i * 0.02);
-        var freq  = 0.006 + i * 0.002;
-        var speed = 0.3 + i * 0.15;
-        var phase = i * 1.2;
-
-        ctx.moveTo(0, h);
-        for (var x = 0; x <= w; x += 3) {
-          var y = yBase
-            + Math.sin(x * freq + t * speed + phase) * amp
-            + Math.sin(x * freq * 1.7 + t * speed * 0.8 + phase + 2) * amp * 0.4
-            + Math.sin(x * freq * 0.5 + t * speed * 1.3 + phase + 4) * amp * 0.3;
-          ctx.lineTo(x, y);
+      var img = ctx.createImageData(w, h);
+      var d = img.data;
+      var scale = 3.5;
+      for (var y = 0; y < h; y++) {
+        for (var x = 0; x < w; x++) {
+          var nx = x / w * scale;
+          var ny = y / h * scale;
+          var n = noise(nx + t*0.15, ny + t*0.08);
+          n += 0.5 * noise(nx*2 + t*0.2, ny*2 + t*0.12);
+          n += 0.25 * noise(nx*4 + t*0.25, ny*4 + t*0.18);
+          n = n / 1.75;
+          var v = Math.floor(n * n * 60);
+          var idx = (y * w + x) * 4;
+          d[idx]   = v;
+          d[idx+1] = v;
+          d[idx+2] = v;
+          d[idx+3] = 255;
         }
-        ctx.lineTo(w, h);
-        ctx.closePath();
-
-        var bright = 20 + i * 8;
-        var grad = ctx.createLinearGradient(0, yBase - amp, 0, yBase + amp);
-        grad.addColorStop(0, 'rgba('+bright+','+bright+','+bright+',0.9)');
-        grad.addColorStop(1, 'rgba(8,8,8,0.95)');
-        ctx.fillStyle = grad;
-        ctx.fill();
       }
-      t += 0.008;
+      ctx.putImageData(img, 0, 0);
+      t += 0.004;
       requestAnimationFrame(draw);
     }
     draw();
