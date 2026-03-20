@@ -11,35 +11,8 @@ body {
   overflow-x: hidden;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(ellipse at 50% 50%, rgba(30,30,30,0.9) 0%, #0a0a0a 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  inset: -50%;
-  background:
-    radial-gradient(ellipse at 30% 40%, rgba(15,15,15,0.95) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 60%, rgba(20,20,20,0.95) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 20%, rgba(10,10,10,0.98) 0%, transparent 40%);
-  filter: url(#waves);
-  animation: waveBg 12s ease-in-out infinite alternate;
-  pointer-events: none;
-  z-index: 0;
-}
-
-@keyframes waveBg {
-  0%   { transform: scale(1) rotate(0deg); }
-  33%  { transform: scale(1.1) rotate(2deg); }
-  66%  { transform: scale(0.95) rotate(-2deg); }
-  100% { transform: scale(1.05) rotate(1deg); }
-}
+body::before { display:none; }
+body::after  { display:none; }
 /* Particules flottantes */
 .particles {
   position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
