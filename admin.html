@@ -131,6 +131,11 @@
       <h3>🕹️ Jeux (<span id="game-count">0</span>)</h3>
     </div>
     <div id="game-list"></div>
+
+    <div class="list-header" style="margin-top:32px">
+      <h3>📬 Demandes de jeux (<span id="req-count">0</span>)</h3>
+    </div>
+    <div id="req-list"></div>
   </div>
 
   <script>
@@ -236,6 +241,21 @@
       db.ref('games/'+id).update({ name, img, dl, desc });
     }
 
+    function acceptRequest(id, name, img) {
+      db.ref('requests/'+id).update({ status: 'accepted' });
+      // Pré-remplir le formulaire d'ajout
+      document.getElementById('game-name').value = name;
+      document.getElementById('game-img').value = img || '';
+      document.getElementById('game-dl').value = '';
+      document.getElementById('game-desc').value = '';
+      document.getElementById('game-name').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function rejectRequest(id) {
+      var comment = prompt('Raison du refus (optionnel) :') || '';
+      db.ref('requests/'+id).update({ status: 'rejected', comment: comment });
+    }
+
     function startPanel() {
       // Stats en temps réel
       db.ref('online').on('value', snap => {
@@ -272,6 +292,33 @@
               </div>
             </div>
           </div>`).join('');
+      });
+
+      // Demandes en temps réel
+      db.ref('requests').on('value', function(snap) {
+        var reqs = [];
+        snap.forEach(function(c) { reqs.push(c.val()); });
+        document.getElementById('req-count').textContent = reqs.filter(r=>r.status==='pending').length;
+        var list = document.getElementById('req-list');
+        if (!reqs.length) { list.innerHTML = '<div class="empty-list">Aucune demande.</div>'; return; }
+        list.innerHTML = reqs.reverse().map(function(r) {
+          var statusBadge = r.status === 'pending'
+            ? '<span style="background:rgba(255,160,0,0.15);color:#ffa000;border:1px solid rgba(255,160,0,0.3);padding:3px 10px;border-radius:50px;font-size:0.75rem">⏳ En attente</span>'
+            : r.status === 'accepted'
+            ? '<span style="background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.3);padding:3px 10px;border-radius:50px;font-size:0.75rem">✅ Accepté</span>'
+            : '<span style="background:rgba(233,69,96,0.15);color:#e94560;border:1px solid rgba(233,69,96,0.3);padding:3px 10px;border-radius:50px;font-size:0.75rem">❌ Refusé</span>';
+          return '<div class="game-item" id="req-'+r.id+'">'
+            + '<div class="game-thumb">'+(r.img ? '<img src="'+r.img+'" onerror="this.parentElement.textContent=\'🎮\'"/>' : '🎮')+'</div>'
+            + '<div class="game-info"><strong>'+r.name+'</strong><span>Par '+r.user+' · '+r.date+(r.msg?' · '+r.msg:'')+'</span>'
+            + (r.comment ? '<span style="color:#e94560;font-size:0.78rem">Refus : '+r.comment+'</span>' : '')
+            + '</div>'
+            + '<div class="game-meta"><div>'+statusBadge+'</div>'
+            + (r.status==='pending' ? '<div class="game-actions">'
+              + '<button class="btn-sm" style="background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.3)" onclick="acceptRequest('+r.id+',\''+r.name+'\',\''+r.img+'\')">✅ Accepter</button>'
+              + '<button class="btn-sm btn-danger" onclick="rejectRequest('+r.id+')">❌ Refuser</button>'
+              + '</div>' : '')
+            + '</div></div>';
+        }).join('');
       });
     }
 
