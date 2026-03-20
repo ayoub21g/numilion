@@ -204,10 +204,33 @@
       const desc = document.getElementById('game-desc').value.trim();
       const msg  = document.getElementById('add-msg');
       if (!name) { showMsg(msg, 'error', 'Le nom est obligatoire.'); return; }
-      const game = { id: Date.now(), name, img, dl, desc, views: 0, downloads: 0 };
-      saveGameToFirebase(game);
-      showMsg(msg, 'success', '"'+name+'" ajouté !');
-      ['game-name','game-img','game-dl','game-desc'].forEach(id => document.getElementById(id).value = '');
+      if (!dl)   { 
+        const game = { id: Date.now(), name, img, dl: '', desc, views: 0, downloads: 0 };
+        saveGameToFirebase(game);
+        showMsg(msg, 'success', '"'+name+'" ajouté !');
+        ['game-name','game-img','game-dl','game-desc'].forEach(id => document.getElementById(id).value = '');
+        return;
+      }
+      showMsg(msg, 'success', 'Création du lien lockr...');
+      fetch('https://numilion.ayoubghe2010.workers.dev/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: name, target: dl })
+      })
+      .then(r => r.json())
+      .then(data => {
+        const lockrUrl = data.data && data.data.id ? 'https://lockr.so/' + data.data.id : dl;
+        const game = { id: Date.now(), name, img, dl: lockrUrl, desc, views: 0, downloads: 0 };
+        saveGameToFirebase(game);
+        showMsg(msg, 'success', '"'+name+'" ajouté avec lien lockr !');
+        ['game-name','game-img','game-dl','game-desc'].forEach(id => document.getElementById(id).value = '');
+      })
+      .catch(() => {
+        const game = { id: Date.now(), name, img, dl, desc, views: 0, downloads: 0 };
+        saveGameToFirebase(game);
+        showMsg(msg, 'success', '"'+name+'" ajouté !');
+        ['game-name','game-img','game-dl','game-desc'].forEach(id => document.getElementById(id).value = '');
+      });
     }
 
     function deleteGame(id) {
