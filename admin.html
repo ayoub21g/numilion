@@ -59,6 +59,11 @@
     .game-actions { display:flex; gap:8px; margin-top:4px; }
     .empty-list { text-align:center; color:#444; padding:40px; font-size:0.9rem; border:1px dashed rgba(255,255,255,0.07); border-radius:16px; }
     .hidden { display:none !important; }
+    .profile-section { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:28px; margin-bottom:32px; }
+    .profile-section h3 { font-size:1rem; color:#ccc; margin-bottom:20px; font-weight:600; }
+    .profile-avatar-edit { display:flex; align-items:center; gap:20px; margin-bottom:20px; }
+    .profile-avatar-big { width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,0.06); border:2px solid rgba(233,69,96,0.4); display:flex; align-items:center; justify-content:center; font-size:2rem; overflow:hidden; flex-shrink:0; }
+    .profile-avatar-big img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
   </style>
 </head>
 <body>
@@ -90,9 +95,36 @@
       <div class="brand"><img src="standard-2.gif" style="height:28px;vertical-align:middle;border-radius:50%;margin-right:8px"/>⚙️ Panel Admin</div>
       <div class="panel-header-actions">
         <div class="panel-avatar" id="panel-avatar">👤</div>
+        <button class="btn-sm btn-outline" onclick="toggleProfileSection()">👤 Mon Profil</button>
         <a href="index.html"><button class="btn-sm btn-outline">🌐 Voir le site</button></a>
         <button class="btn-sm btn-danger" onclick="logout()">Déconnexion</button>
       </div>
+    </div>
+
+    <!-- Section Profil Admin -->
+    <div class="profile-section hidden" id="profile-section">
+      <h3>👤 Modifier mon profil admin</h3>
+      <div id="profile-msg" class="hidden"></div>
+      <div class="profile-avatar-edit">
+        <div class="profile-avatar-big" id="profile-avatar-big">👤</div>
+        <div>
+          <label class="avatar-upload-btn" for="profile-avatar-input" style="display:inline-block;cursor:pointer">📷 Changer la photo</label>
+          <input type="file" id="profile-avatar-input" accept="image/*" style="display:none" onchange="handleProfileAvatarChange(this)"/>
+          <p style="color:#555;font-size:0.78rem;margin-top:6px">Ou colle une URL :</p>
+          <input type="url" id="profile-avatar-url" placeholder="https://..." style="padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:inherit;font-size:0.85rem;width:260px"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Nouveau nom d'utilisateur</label>
+          <input type="text" id="profile-newuser" placeholder="Laisser vide pour ne pas changer"/>
+        </div>
+        <div>
+          <label>Nouveau mot de passe</label>
+          <input type="password" id="profile-newpass" placeholder="Laisser vide pour ne pas changer"/>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:auto;padding:12px 36px;margin-top:6px" onclick="saveAdminProfile()">💾 Sauvegarder</button>
     </div>
 
     <div class="stats">
@@ -139,11 +171,6 @@
   </div>
 
   <script>
-    const ADMIN_USER = 'ayoub';
-    const ADMIN_PASS = 'Louly2010@';
-    const ADMIN_USER2 = 'lertie';
-    const ADMIN_PASS2 = 'Ley@n93110';
-
     function previewAvatar(input) {
       if (!input.files || !input.files[0]) return;
       const reader = new FileReader();
@@ -172,19 +199,23 @@
     if (savedAvatar) setAvatar(savedAvatar);
 
     function login() {
-      const u = document.getElementById('username').value;
+      const u = document.getElementById('username').value.trim();
       const p = document.getElementById('password').value;
-      if ((u === ADMIN_USER && p === ADMIN_PASS) || (u === ADMIN_USER2 && p === ADMIN_PASS2)) {
-        const avatar = localStorage.getItem('numilion_avatar') || 'https://i.imgur.com/lRqkh3u.jpeg';
-        localStorage.setItem('numilion_session', JSON.stringify({ user: u, role: 'admin', avatar }));
-        document.getElementById('login-wrap').classList.add('hidden');
-        document.getElementById('panel').classList.remove('hidden');
-        startPanel();
-      } else {
-        const err = document.getElementById('login-error');
-        err.textContent = 'Identifiants incorrects.';
-        err.classList.remove('hidden');
-      }
+      if (!u || !p) { const err = document.getElementById('login-error'); err.textContent = 'Remplis tous les champs.'; err.classList.remove('hidden'); return; }
+      db.ref('admins/' + u).once('value', function(snap) {
+        const admin = snap.val();
+        if (admin && admin.pass === p) {
+          const avatar = localStorage.getItem('numilion_avatar_' + u) || admin.avatar || 'https://i.imgur.com/lRqkh3u.jpeg';
+          localStorage.setItem('numilion_session', JSON.stringify({ user: u, role: 'admin', avatar }));
+          document.getElementById('login-wrap').classList.add('hidden');
+          document.getElementById('panel').classList.remove('hidden');
+          startPanel();
+        } else {
+          const err = document.getElementById('login-error');
+          err.textContent = 'Identifiants incorrects.';
+          err.classList.remove('hidden');
+        }
+      });
     }
 
     function logout() {
@@ -369,6 +400,100 @@
       });
     }
 
+    function toggleProfileSection() {
+      var s = document.getElementById('profile-section');
+      s.classList.toggle('hidden');
+      if (!s.classList.contains('hidden')) {
+        // Pré-remplir avec les infos actuelles
+        var session = JSON.parse(localStorage.getItem('numilion_session') || 'null');
+        if (session) {
+          document.getElementById('profile-newuser').value = '';
+          document.getElementById('profile-newpass').value = '';
+          document.getElementById('profile-avatar-url').value = '';
+          // Afficher avatar actuel
+          var avatar = localStorage.getItem('numilion_avatar_' + session.user) || session.avatar || 'https://i.imgur.com/lRqkh3u.jpeg';
+          var big = document.getElementById('profile-avatar-big');
+          big.innerHTML = '<img src="' + avatar + '" alt="avatar"/>';
+        }
+      }
+    }
+
+    function handleProfileAvatarChange(input) {
+      if (!input.files || !input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('profile-avatar-big').innerHTML = '<img src="' + e.target.result + '" alt="avatar"/>';
+        document.getElementById('profile-avatar-url').value = '';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    function saveAdminProfile() {
+      var session = JSON.parse(localStorage.getItem('numilion_session') || 'null');
+      if (!session || session.role !== 'admin') return;
+      var currentUser = session.user;
+      var newUser = document.getElementById('profile-newuser').value.trim();
+      var newPass = document.getElementById('profile-newpass').value;
+      var avatarUrl = document.getElementById('profile-avatar-url').value.trim();
+      var fileInput = document.getElementById('profile-avatar-input');
+      var msgEl = document.getElementById('profile-msg');
+
+      function applyChanges(avatarData) {
+        var updates = {};
+        var targetUser = newUser || currentUser;
+
+        if (newPass) updates.pass = newPass;
+        if (avatarData) updates.avatar = avatarData;
+
+        // Si changement de nom : créer nouveau nœud, supprimer l'ancien
+        if (newUser && newUser !== currentUser) {
+          db.ref('admins/' + currentUser).once('value', function(snap) {
+            var existing = snap.val() || {};
+            var merged = Object.assign({}, existing, updates, { user: newUser });
+            db.ref('admins/' + newUser).set(merged);
+            db.ref('admins/' + currentUser).remove();
+            // Mettre à jour la session
+            session.user = newUser;
+            if (avatarData) session.avatar = avatarData;
+            localStorage.setItem('numilion_session', JSON.stringify(session));
+            if (avatarData) localStorage.setItem('numilion_avatar_' + newUser, avatarData);
+            showProfileMsg('success', 'Profil mis à jour ! Reconnecte-toi.');
+            setTimeout(function() { logout(); }, 1500);
+          });
+        } else {
+          if (Object.keys(updates).length === 0) { showProfileMsg('error', 'Aucune modification.'); return; }
+          db.ref('admins/' + currentUser).update(updates);
+          if (avatarData) {
+            session.avatar = avatarData;
+            localStorage.setItem('numilion_avatar_' + currentUser, avatarData);
+          }
+          localStorage.setItem('numilion_session', JSON.stringify(session));
+          // Mettre à jour l'avatar affiché
+          if (avatarData) { setAvatar(avatarData); }
+          showProfileMsg('success', 'Profil mis à jour !');
+        }
+      }
+
+      // Priorité : fichier > URL > rien
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => applyChanges(e.target.result);
+        reader.readAsDataURL(fileInput.files[0]);
+      } else if (avatarUrl) {
+        applyChanges(avatarUrl);
+      } else {
+        applyChanges(null);
+      }
+    }
+
+    function showProfileMsg(type, text) {
+      var el = document.getElementById('profile-msg');
+      el.className = 'add-msg ' + type;
+      el.textContent = text;
+      el.classList.remove('hidden');
+      setTimeout(function() { el.classList.add('hidden'); }, 3000);
+    }
+
     document.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !document.getElementById('login-wrap').classList.contains('hidden')) login();
     });
@@ -377,11 +502,17 @@
     (function() {
       const session = JSON.parse(localStorage.getItem('numilion_session') || 'null');
       if (session && session.role === 'admin') {
-        const avatar = localStorage.getItem('numilion_avatar') || session.avatar;
-        if (avatar) { session.avatar = avatar; localStorage.setItem('numilion_session', JSON.stringify(session)); setAvatar(avatar); }
-        document.getElementById('login-wrap').classList.add('hidden');
-        document.getElementById('panel').classList.remove('hidden');
-        startPanel();
+        // Recharger les infos admin depuis Firebase pour avoir les données à jour
+        db.ref('admins/' + session.user).once('value', function(snap) {
+          const admin = snap.val();
+          const avatar = localStorage.getItem('numilion_avatar_' + session.user) || (admin && admin.avatar) || session.avatar || 'https://i.imgur.com/lRqkh3u.jpeg';
+          session.avatar = avatar;
+          localStorage.setItem('numilion_session', JSON.stringify(session));
+          setAvatar(avatar);
+          document.getElementById('login-wrap').classList.add('hidden');
+          document.getElementById('panel').classList.remove('hidden');
+          startPanel();
+        });
       }
     })();
   </script>

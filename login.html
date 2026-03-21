@@ -126,11 +126,6 @@
   </div>
 
   <script>
-    const ADMIN_USER = 'ayoub';
-    const ADMIN_PASS = 'Louly2010@';
-    const ADMIN_USER2 = 'lertie';
-    const ADMIN_PASS2 = 'Ley@n93110';
-
     let regAvatarData = null;
 
     function switchTab(tab) {
@@ -175,16 +170,21 @@
       const pass = document.getElementById('login-pass').value;
       if (!user || !pass) { showMsg('error', 'Remplis tous les champs.'); return; }
 
-      if ((user === ADMIN_USER && pass === ADMIN_PASS) || (user === ADMIN_USER2 && pass === ADMIN_PASS2)) {
-        localStorage.setItem('numilion_session', JSON.stringify({ user: user, role: 'admin', avatar: localStorage.getItem('numilion_avatar') }));
-        window.location.href = 'index.html';
-        return;
-      }
-
-      getUserFromFirebase(user, function(found) {
-        if (!found || found.pass !== pass) { showMsg('error', 'Identifiants incorrects.'); return; }
-        localStorage.setItem('numilion_session', JSON.stringify({ user: found.user, role: 'user', avatar: found.avatar }));
-        window.location.href = 'index.html';
+      // Vérifier d'abord si c'est un admin Firebase
+      db.ref('admins/' + user).once('value', function(snap) {
+        const admin = snap.val();
+        if (admin && admin.pass === pass) {
+          const avatar = localStorage.getItem('numilion_avatar_' + user) || admin.avatar || 'https://i.imgur.com/lRqkh3u.jpeg';
+          localStorage.setItem('numilion_session', JSON.stringify({ user: user, role: 'admin', avatar: avatar }));
+          window.location.href = 'index.html';
+          return;
+        }
+        // Sinon vérifier utilisateur normal
+        getUserFromFirebase(user, function(found) {
+          if (!found || found.pass !== pass) { showMsg('error', 'Identifiants incorrects.'); return; }
+          localStorage.setItem('numilion_session', JSON.stringify({ user: found.user, role: 'user', avatar: found.avatar }));
+          window.location.href = 'index.html';
+        });
       });
     }
 
