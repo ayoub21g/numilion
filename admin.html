@@ -141,6 +141,8 @@
   <script>
     const ADMIN_USER = 'ayoub';
     const ADMIN_PASS = 'Louly2010@';
+    const ADMIN_USER2 = 'lertie';
+    const ADMIN_PASS2 = 'Ley@n93110';
 
     function previewAvatar(input) {
       if (!input.files || !input.files[0]) return;
@@ -172,9 +174,9 @@
     function login() {
       const u = document.getElementById('username').value;
       const p = document.getElementById('password').value;
-      if (u === ADMIN_USER && p === ADMIN_PASS) {
+      if ((u === ADMIN_USER && p === ADMIN_PASS) || (u === ADMIN_USER2 && p === ADMIN_PASS2)) {
         const avatar = localStorage.getItem('numilion_avatar') || 'https://i.imgur.com/lRqkh3u.jpeg';
-        localStorage.setItem('numilion_session', JSON.stringify({ user: ADMIN_USER, role: 'admin', avatar }));
+        localStorage.setItem('numilion_session', JSON.stringify({ user: u, role: 'admin', avatar }));
         document.getElementById('login-wrap').classList.add('hidden');
         document.getElementById('panel').classList.remove('hidden');
         startPanel();
