@@ -6,8 +6,8 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="firebase.js"></script>
 <script>
-  firebase.database().ref('users').remove().then(function() {
-    document.body.innerHTML = '<h2 style="color:green;font-family:sans-serif">✅ Tous les comptes utilisateurs ont été supprimés.</h2>';
+  firebase.database().ref('requests').remove().then(function() {
+    document.body.innerHTML = '<h2 style="color:green;font-family:sans-serif">✅ Toutes les demandes de jeux ont été supprimées.</h2>';
   }).catch(function(e) {
     document.body.innerHTML = '<h2 style="color:red;font-family:sans-serif">❌ Erreur : ' + e.message + '</h2>';
   });
