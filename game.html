@@ -131,7 +131,8 @@
     }
 
     function searchYouTube(query, callback) {
-      fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=' + encodeURIComponent(query) + '&key=' + YT_API_KEY)
+      // Cherche 5 résultats et prend le premier qui autorise l'embed
+      fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&videoEmbeddable=true&q=' + encodeURIComponent(query) + '&key=' + YT_API_KEY)
         .then(function(r) { return r.json(); })
         .then(function(data) {
           if (data.items && data.items.length > 0) {
