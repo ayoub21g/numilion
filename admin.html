@@ -205,12 +205,8 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
           if (data.appid && data.cover) {
-            // Si desc vide depuis Steam, générer depuis YouTube
-            if (!data.desc || data.desc.trim() === '') {
-              fallbackDescYouTube(name, data.cover, btn);
-            } else {
-              applyAutoFill(data.cover, data.desc, btn);
-            }
+            // Toujours chercher une description via YouTube (plus fiable)
+            fallbackDescYouTube(name, data.cover, btn);
           } else {
             fallbackYouTube(name, btn);
           }
@@ -219,17 +215,30 @@
     }
 
     function fallbackDescYouTube(name, cover, btn) {
-      fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=' + encodeURIComponent(name + ' game') + '&key=' + YT_API_KEY)
+      // Chercher le trailer officiel pour avoir une description propre
+      fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=3&q=' + encodeURIComponent(name + ' official trailer') + '&key=' + YT_API_KEY)
         .then(function(r) { return r.json(); })
         .then(function(data) {
-          var desc = name;
+          var desc = '';
           if (data.items && data.items.length > 0) {
-            var snip = data.items[0].snippet;
-            // Prendre la description YouTube courte (pas le titre)
-            desc = snip.description ? snip.description.replace(/[™®\n]/g, ' ').trim().split(/\s+/).slice(0, 8).join(' ')
-                 : snip.title.replace(/[|:\-–—™®]/g, ' ').trim().split(/\s+/).slice(0, 6).join(' ');
+            // Chercher une description non vide parmi les résultats
+            for (var i = 0; i < data.items.length; i++) {
+              var snip = data.items[i].snippet;
+              var raw = (snip.description || '').replace(/[™®\n\r]/g, ' ').replace(/https?:\/\/\S+/g, '').trim();
+              if (raw.length > 20) {
+                desc = raw.split(/\s+/).slice(0, 8).join(' ');
+                break;
+              }
+            }
+            // Si toujours vide, prendre le titre nettoyé
+            if (!desc) {
+              desc = data.items[0].snippet.title
+                .replace(/[|:\-–—™®]/g, ' ')
+                .replace(/official|trailer|gameplay|\d{4}/gi, '')
+                .trim().split(/\s+/).slice(0, 6).join(' ');
+            }
           }
-          applyAutoFill(cover, desc, btn);
+          applyAutoFill(cover, desc || name, btn);
         })
         .catch(function() { applyAutoFill(cover, name, btn); });
     }
