@@ -177,14 +177,13 @@
         + '</div>'
 
         + '<div class="section-block">'
-        + '<h2>💻 Composants recommandés</h2>'
+        + '<h2>💻 Composants minimaux</h2>'
         + '<div class="specs-grid">'
         + specItems.map(function(s) {
             return '<div class="spec-card">'
               + '<div class="spec-icon">' + s.icon + '</div>'
               + '<div class="spec-label">' + s.label + '</div>'
-              + '<div class="spec-value">' + s.rec + '</div>'
-              + '<div class="spec-min">Min : ' + s.min + '</div>'
+              + '<div class="spec-value">' + s.min + '</div>'
               + '</div>';
           }).join('')
         + '</div>'
