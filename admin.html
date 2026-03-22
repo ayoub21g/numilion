@@ -199,33 +199,13 @@
       btn.textContent = '⏳ Recherche...';
       btn.disabled = true;
 
-      // Chercher sur Steam (API publique, pas de clé)
-      fetch('https://store.steampowered.com/api/storesearch/?term=' + encodeURIComponent(name) + '&l=french&cc=FR')
+      // Chercher via YouTube avec des mots-clés précis pour avoir une vraie description
+      // On cherche d'abord l'appid Steam via l'API de recherche Steam (via worker pour CORS)
+      fetch('https://numilion.ayoubghe2010.workers.dev/?steam_search=' + encodeURIComponent(name))
         .then(function(r) { return r.json(); })
         .then(function(data) {
-          if (data.items && data.items.length > 0) {
-            var game = data.items[0];
-            var appid = game.id;
-            var cover = 'https://cdn.cloudflare.steamstatic.com/steam/apps/' + appid + '/library_600x900.jpg';
-
-            // Récupérer les détails du jeu pour la vraie description
-            fetch('https://store.steampowered.com/api/appdetails?appids=' + appid + '&l=french&cc=FR')
-              .then(function(r) { return r.json(); })
-              .then(function(detail) {
-                var desc = '';
-                var d = detail[appid] && detail[appid].data;
-                if (d && d.short_description) {
-                  // Prendre les 8 premiers mots de la description officielle
-                  desc = d.short_description.replace(/<[^>]+>/g, '').replace(/[™®]/g, '').trim().split(/\s+/).slice(0, 8).join(' ');
-                } else {
-                  desc = game.name.replace(/[™®]/g, '').trim().split(/\s+/).slice(0, 5).join(' ');
-                }
-                applyAutoFill(cover, desc, btn);
-              })
-              .catch(function() {
-                var desc = game.name.replace(/[™®]/g, '').trim().split(/\s+/).slice(0, 5).join(' ');
-                applyAutoFill(cover, desc, btn);
-              });
+          if (data.appid && data.cover) {
+            applyAutoFill(data.cover, data.desc || '', btn);
           } else {
             fallbackYouTube(name, btn);
           }
