@@ -199,36 +199,55 @@
       btn.textContent = '⏳ Recherche...';
       btn.disabled = true;
 
-      fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=' + encodeURIComponent(name + ' official trailer') + '&key=' + YT_API_KEY)
+      // Chercher sur Steam (API publique, pas de clé)
+      fetch('https://store.steampowered.com/api/storesearch/?term=' + encodeURIComponent(name) + '&l=french&cc=FR')
         .then(function(r) { return r.json(); })
         .then(function(data) {
-          btn.textContent = '✨ Auto-remplir';
-          btn.disabled = false;
-          if (!data.items || !data.items.length) return;
-          var item = data.items[0].snippet;
-          // Image : miniature haute qualité
-          var thumb = item.thumbnails.high ? item.thumbnails.high.url
-                    : item.thumbnails.medium ? item.thumbnails.medium.url
-                    : item.thumbnails.default.url;
-          // Description : 5 premiers mots du titre YouTube
-          var words = item.title.replace(/[|:\-–—]/g, ' ').trim().split(/\s+/).slice(0, 5).join(' ');
+          if (data.items && data.items.length > 0) {
+            var game = data.items[0];
+            var appid = game.id;
+            // Couverture Steam en grand format (600x900 portrait ou 460x215 landscape)
+            var cover = 'https://cdn.cloudflare.steamstatic.com/steam/apps/' + appid + '/library_600x900.jpg';
+            var desc = game.name.replace(/[™®]/g, '').trim().split(/\s+/).slice(0, 5).join(' ');
 
-          // Remplir les champs si vides
-          var imgField = document.getElementById('game-img');
-          var descField = document.getElementById('game-desc');
-          if (!imgField.value) imgField.value = thumb;
-          if (!descField.value) descField.value = words;
-
-          // Aperçu
-          var preview = document.getElementById('autofill-preview');
-          document.getElementById('autofill-img-preview').src = thumb;
-          document.getElementById('autofill-desc-preview').textContent = words;
-          preview.style.display = 'flex';
+            applyAutoFill(cover, desc, btn);
+          } else {
+            // Fallback YouTube si pas trouvé sur Steam
+            fallbackYouTube(name, btn);
+          }
         })
-        .catch(function() {
-          btn.textContent = '✨ Auto-remplir';
-          btn.disabled = false;
-        });
+        .catch(function() { fallbackYouTube(name, btn); });
+    }
+
+    function fallbackYouTube(name, btn) {
+      fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=' + encodeURIComponent(name + ' game trailer') + '&key=' + YT_API_KEY)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.items && data.items.length > 0) {
+            var item = data.items[0].snippet;
+            var cover = item.thumbnails.maxres ? item.thumbnails.maxres.url
+                      : item.thumbnails.high ? item.thumbnails.high.url
+                      : item.thumbnails.medium.url;
+            var desc = item.title.replace(/[|:\-–—™®]/g, ' ').trim().split(/\s+/).slice(0, 5).join(' ');
+            applyAutoFill(cover, desc, btn);
+          } else {
+            btn.textContent = '✨ Auto-remplir'; btn.disabled = false;
+          }
+        })
+        .catch(function() { btn.textContent = '✨ Auto-remplir'; btn.disabled = false; });
+    }
+
+    function applyAutoFill(cover, desc, btn) {
+      btn.textContent = '✨ Auto-remplir';
+      btn.disabled = false;
+      var imgField  = document.getElementById('game-img');
+      var descField = document.getElementById('game-desc');
+      if (!imgField.value)  imgField.value  = cover;
+      if (!descField.value) descField.value = desc;
+      var preview = document.getElementById('autofill-preview');
+      document.getElementById('autofill-img-preview').src = cover;
+      document.getElementById('autofill-desc-preview').textContent = desc;
+      preview.style.display = 'flex';
     }
 
     function previewAvatar(input) {
