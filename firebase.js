@@ -47,8 +47,14 @@ function trackVisit() {
 function loadGamesFromFirebase(callback) {
   db.ref('games').on('value', function(snap) {
     var games = [];
-    snap.forEach(function(child) { games.push(child.val()); });
+    snap.forEach(function(child) {
+      var g = child.val();
+      if (g && g.id) games.push(g);
+    });
     callback(games);
+  }, function(err) {
+    console.error('Firebase read error:', err.message);
+    callback([]);
   });
 }
 

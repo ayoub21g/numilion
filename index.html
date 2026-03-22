@@ -218,7 +218,7 @@
   <script>
     function checkLogin(e, el) {
       var session = JSON.parse(localStorage.getItem('numilion_session') || 'null');
-      if (session) return true; // connecté, laisser passer
+      if (session) return true;
       e.preventDefault();
       document.getElementById('login-required-modal').style.display = 'flex';
       return false;
@@ -248,6 +248,9 @@
       setTimeout(function(){ document.getElementById('request-modal').style.display='none'; msgBox.style.display='none'; document.getElementById('req-name').value=''; document.getElementById('req-img').value=''; document.getElementById('req-msg-text').value=''; }, 1500);
     }
 
+    var GAMES_PER_PAGE = 20;
+    var allGames = [];
+
     function makeCard(g) {
       return '<div class="game-card" onclick="window.location.href=\'game.html?id='+g.id+'\'" style="cursor:pointer">'
         + '<div class="game-icon">'
@@ -258,8 +261,6 @@
         + (g.dl ? '<a href="' + g.dl + '" class="dl-btn" onclick="event.stopPropagation();return checkLogin(event, this)">⬇️ Telecharger</a>' : '')
         + '</div>';
     }
-
-    var allGames = [];
 
     loadGamesFromFirebase(function(games) {
       allGames = games;
@@ -272,7 +273,6 @@
       var page1 = games.slice(0, GAMES_PER_PAGE);
       grid.innerHTML = page1.map(makeCard).join('');
 
-      // Pagination
       var totalPages = Math.ceil(games.length / GAMES_PER_PAGE);
       var pag = document.getElementById('pagination');
       if (totalPages > 1) {
@@ -286,12 +286,6 @@
         pag.style.display = 'none';
       }
     });
-
-    function generatePageLinks(games, totalPages) {
-      // Stocker les jeux dans sessionStorage pour que jeux2.html etc. puissent les lire
-      sessionStorage.setItem('numilion_all_games', JSON.stringify(games));
-      sessionStorage.setItem('numilion_total_pages', totalPages);
-    }
 
     trackVisit();
   </script>
