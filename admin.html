@@ -141,7 +141,14 @@
       <div class="form-row">
         <div class="form-full">
           <label>Nom du jeu</label>
-          <input type="text" id="game-name" placeholder="Ex: Minecraft"/>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input type="text" id="game-name" placeholder="Ex: Minecraft" style="margin-bottom:0" oninput="clearAutoFill()"/>
+            <button type="button" class="btn-sm" style="background:linear-gradient(135deg,#e94560,#a855f7);color:#fff;border:none;white-space:nowrap;flex-shrink:0" onclick="autoFillGame()">✨ Auto-remplir</button>
+          </div>
+          <div id="autofill-preview" style="display:none;margin-top:12px;display:none;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px">
+            <img id="autofill-img-preview" src="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0"/>
+            <div style="font-size:0.85rem;color:#aaa" id="autofill-desc-preview"></div>
+          </div>
         </div>
         <div>
           <label>Image (URL)</label>
@@ -179,6 +186,51 @@
   </div>
 
   <script>
+    var YT_API_KEY = 'AIzaSyCk0lna6aTZP03UM0WRBA5tmjoIs1KnKKk';
+
+    function clearAutoFill() {
+      document.getElementById('autofill-preview').style.display = 'none';
+    }
+
+    function autoFillGame() {
+      var name = document.getElementById('game-name').value.trim();
+      if (!name) { alert('Entre d\'abord le nom du jeu.'); return; }
+      var btn = event.target;
+      btn.textContent = '⏳ Recherche...';
+      btn.disabled = true;
+
+      fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=' + encodeURIComponent(name + ' official trailer') + '&key=' + YT_API_KEY)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          btn.textContent = '✨ Auto-remplir';
+          btn.disabled = false;
+          if (!data.items || !data.items.length) return;
+          var item = data.items[0].snippet;
+          // Image : miniature haute qualité
+          var thumb = item.thumbnails.high ? item.thumbnails.high.url
+                    : item.thumbnails.medium ? item.thumbnails.medium.url
+                    : item.thumbnails.default.url;
+          // Description : 5 premiers mots du titre YouTube
+          var words = item.title.replace(/[|:\-–—]/g, ' ').trim().split(/\s+/).slice(0, 5).join(' ');
+
+          // Remplir les champs si vides
+          var imgField = document.getElementById('game-img');
+          var descField = document.getElementById('game-desc');
+          if (!imgField.value) imgField.value = thumb;
+          if (!descField.value) descField.value = words;
+
+          // Aperçu
+          var preview = document.getElementById('autofill-preview');
+          document.getElementById('autofill-img-preview').src = thumb;
+          document.getElementById('autofill-desc-preview').textContent = words;
+          preview.style.display = 'flex';
+        })
+        .catch(function() {
+          btn.textContent = '✨ Auto-remplir';
+          btn.disabled = false;
+        });
+    }
+
     function previewAvatar(input) {
       if (!input.files || !input.files[0]) return;
       const reader = new FileReader();
