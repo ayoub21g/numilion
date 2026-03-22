@@ -205,12 +205,33 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
           if (data.appid && data.cover) {
-            applyAutoFill(data.cover, data.desc || '', btn);
+            // Si desc vide depuis Steam, générer depuis YouTube
+            if (!data.desc || data.desc.trim() === '') {
+              fallbackDescYouTube(name, data.cover, btn);
+            } else {
+              applyAutoFill(data.cover, data.desc, btn);
+            }
           } else {
             fallbackYouTube(name, btn);
           }
         })
         .catch(function() { fallbackYouTube(name, btn); });
+    }
+
+    function fallbackDescYouTube(name, cover, btn) {
+      fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=' + encodeURIComponent(name + ' game') + '&key=' + YT_API_KEY)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var desc = name;
+          if (data.items && data.items.length > 0) {
+            var snip = data.items[0].snippet;
+            // Prendre la description YouTube courte (pas le titre)
+            desc = snip.description ? snip.description.replace(/[™®\n]/g, ' ').trim().split(/\s+/).slice(0, 8).join(' ')
+                 : snip.title.replace(/[|:\-–—™®]/g, ' ').trim().split(/\s+/).slice(0, 6).join(' ');
+          }
+          applyAutoFill(cover, desc, btn);
+        })
+        .catch(function() { applyAutoFill(cover, name, btn); });
     }
 
     function fallbackYouTube(name, btn) {
