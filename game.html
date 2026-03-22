@@ -121,27 +121,52 @@
       };
     }
 
-    // Générer l'ID YouTube de recherche automatique
-    function ytSearchEmbed(query, suffix) {
-      // On utilise youtube-nocookie avec une recherche
-      var q = encodeURIComponent(query + ' ' + suffix);
-      return 'https://www.youtube-nocookie.com/embed?listType=search&list=' + q;
-    }
+    // Clé API YouTube
+    var YT_API_KEY = 'AIzaSyD3MQOL_IdRNW7T8pNXQYTAHw4Cs2EiOZQ';
 
     function ytIdEmbed(idOrUrl) {
       if (!idOrUrl) return null;
-      // Si c'est déjà un ID court (11 chars)
-      if (/^[a-zA-Z0-9_-]{11}$/.test(idOrUrl)) return 'https://www.youtube-nocookie.com/embed/' + idOrUrl;
-      // Si c'est une URL youtube
+      if (/^[a-zA-Z0-9_-]{11}$/.test(idOrUrl)) return idOrUrl;
       var m = idOrUrl.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
-      if (m) return 'https://www.youtube-nocookie.com/embed/' + m[1];
-      return null;
+      return m ? m[1] : null;
+    }
+
+    // Recherche via Invidious (API YouTube publique sans clé)
+    function searchYouTube(query, callback) {
+      fetch('https://inv.nadeko.net/api/v1/search?q=' + encodeURIComponent(query) + '&type=video&page=1')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (Array.isArray(data) && data.length > 0) {
+            callback(data[0].videoId);
+          } else {
+            callback(null);
+          }
+        })
+        .catch(function() {
+          // Fallback sur une autre instance Invidious
+          fetch('https://invidious.privacydev.net/api/v1/search?q=' + encodeURIComponent(query) + '&type=video')
+            .then(function(r) { return r.json(); })
+            .then(function(data) { callback(Array.isArray(data) && data.length > 0 ? data[0].videoId : null); })
+            .catch(function() { callback(null); });
+        });
+    }
+
+    function embedUrl(videoId) {
+      return 'https://www.youtube-nocookie.com/embed/' + videoId + '?rel=0';
+    }
+
+    function setVideoIframe(elId, videoId) {
+      var wrap = document.getElementById(elId);
+      if (!wrap) return;
+      if (videoId) {
+        wrap.innerHTML = '<iframe src="' + embedUrl(videoId) + '" allowfullscreen loading="lazy" style="width:100%;height:100%;border:none;display:block"></iframe>';
+      } else {
+        wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#444;font-size:0.85rem">Vidéo non disponible</div>';
+      }
     }
 
     function renderGame(g) {
       var specs = getSpecs(g.name, g.desc);
-      var trailerSrc = ytIdEmbed(g.trailer) || ytSearchEmbed(g.name, 'official trailer');
-      var gameplaySrc = ytIdEmbed(g.gameplay) || ytSearchEmbed(g.name, 'gameplay 2024');
 
       var specItems = [
         { icon:'🖥️', label:'Processeur', rec: specs.cpu.rec, min: specs.cpu.min },
@@ -170,9 +195,9 @@
         + '<h2>🎬 Vidéos</h2>'
         + '<div class="videos-grid">'
         + '<div><div style="font-size:0.8rem;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Bande annonce</div>'
-        + '<div class="video-wrap"><iframe src="' + trailerSrc + '" allowfullscreen loading="lazy"></iframe></div></div>'
+        + '<div class="video-wrap" id="video-trailer"><div style="display:flex;align-items:center;justify-content:center;height:100%;color:#444;font-size:0.85rem">Chargement...</div></div></div>'
         + '<div><div style="font-size:0.8rem;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Gameplay</div>'
-        + '<div class="video-wrap"><iframe src="' + gameplaySrc + '" allowfullscreen loading="lazy"></iframe></div></div>'
+        + '<div class="video-wrap" id="video-gameplay"><div style="display:flex;align-items:center;justify-content:center;height:100%;color:#444;font-size:0.85rem">Chargement...</div></div></div>'
         + '</div>'
         + '</div>'
 
@@ -213,6 +238,27 @@
         var g = snap.val();
         if (!g) { document.getElementById('game-content').innerHTML = '<div class="loading">Jeu introuvable.</div>'; return; }
         renderGame(g);
+
+        // Charger les vidéos automatiquement
+        var trailerFixed = ytIdEmbed(g.trailer);
+        var gameplayFixed = ytIdEmbed(g.gameplay);
+
+        if (trailerFixed) {
+          setVideoIframe('video-trailer', trailerFixed);
+        } else {
+          searchYouTube(g.name + ' official trailer', function(id) {
+            setVideoIframe('video-trailer', id);
+          });
+        }
+
+        if (gameplayFixed) {
+          setVideoIframe('video-gameplay', gameplayFixed);
+        } else {
+          searchYouTube(g.name + ' gameplay', function(id) {
+            setVideoIframe('video-gameplay', id);
+          });
+        }
+
         // Incrémenter les vues
         db.ref('games/' + gameId + '/views').transaction(function(v) { return (v || 0) + 1; });
       });
