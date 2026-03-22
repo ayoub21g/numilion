@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Numilion — Jeu</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .game-page { max-width:960px; margin:0 auto; padding:40px 20px 80px; position:relative; z-index:1; }
+    .back-btn { display:inline-flex; align-items:center; gap:8px; color:#888; font-size:0.88rem; text-decoration:none; margin-bottom:32px; transition:color 0.2s; }
+    .back-btn:hover { color:#e94560; }
+    .game-hero { display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-bottom:40px; align-items:start; }
+    .game-cover { border-radius:20px; overflow:hidden; aspect-ratio:16/9; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); }
+    .game-cover img { width:100%; height:100%; object-fit:cover; display:block; }
+    .game-cover-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:5rem; }
+    .game-info-box { display:flex; flex-direction:column; gap:16px; }
+    .game-title { font-size:2rem; font-weight:700; background:linear-gradient(135deg,#e94560,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1.2; }
+    .game-desc { color:#888; font-size:0.95rem; line-height:1.7; }
+    .game-dl-btn { display:inline-block; padding:14px 36px; border-radius:50px; background:linear-gradient(135deg,#e94560,#a855f7); color:#fff; font-weight:700; font-size:1rem; text-decoration:none; transition:opacity 0.2s; width:fit-content; }
+    .game-dl-btn:hover { opacity:0.85; }
+    .section-block { margin-bottom:40px; }
+    .section-block h2 { font-size:1rem; color:#666; text-transform:uppercase; letter-spacing:2px; margin-bottom:20px; display:flex; align-items:center; gap:8px; }
+    .video-wrap { border-radius:16px; overflow:hidden; aspect-ratio:16/9; background:#000; border:1px solid rgba(255,255,255,0.08); }
+    .video-wrap iframe { width:100%; height:100%; border:none; display:block; }
+    .videos-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .specs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; }
+    .spec-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:18px; }
+    .spec-card .spec-icon { font-size:1.8rem; margin-bottom:10px; }
+    .spec-card .spec-label { font-size:0.75rem; color:#555; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+    .spec-card .spec-value { font-size:0.9rem; color:#ccc; font-weight:600; }
+    .spec-card .spec-min { font-size:0.78rem; color:#555; margin-top:2px; }
+    .loading { text-align:center; padding:60px; color:#444; font-size:0.9rem; }
+    @media(max-width:640px) {
+      .game-hero { grid-template-columns:1fr; }
+      .videos-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="wave-canvas" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"></canvas>
+  <div class="particles" id="particles"></div>
+
+  <nav>
+    <div class="nav-inner">
+      <span class="nav-logo"><img src="standard-2.gif" alt="Numilion" style="height:36px;vertical-align:middle;border-radius:50%"/> Numilion</span>
+      <div class="nav-links">
+        <a href="login.html" class="nav-btn" id="nav-login-btn">Connexion</a>
+        <div id="nav-user"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="game-page">
+    <a href="javascript:history.back()" class="back-btn">← Retour</a>
+    <div id="game-content"><div class="loading">Chargement...</div></div>
+  </div>
+
+  <!-- Modal connexion obligatoire -->
+  <div id="login-required-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
+    <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px 36px;width:100%;max-width:380px;text-align:center;position:relative">
+      <button onclick="document.getElementById('login-required-modal').style.display='none'" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#666;font-size:1.3rem;cursor:pointer">✕</button>
+      <div style="font-size:3rem;margin-bottom:16px">🔒</div>
+      <h3 style="font-size:1.2rem;font-weight:700;color:#fff;margin-bottom:12px">Compte requis</h3>
+      <p style="color:#888;font-size:0.9rem;margin-bottom:24px;line-height:1.6">Tu dois avoir un compte pour télécharger des jeux.</p>
+      <a href="login.html" style="display:block;padding:13px;border-radius:50px;background:linear-gradient(135deg,#e94560,#a855f7);color:#fff;font-weight:700;font-size:1rem;text-decoration:none;margin-bottom:10px">Se connecter / S'inscrire</a>
+      <button onclick="document.getElementById('login-required-modal').style.display='none'" style="background:none;border:none;color:#555;font-size:0.85rem;cursor:pointer;font-family:inherit">Annuler</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="firebase.js"></script>
+  <script src="script.js"></script>
+  <script>
+    function checkLogin(e) {
+      var session = JSON.parse(localStorage.getItem('numilion_session') || 'null');
+      if (session) return true;
+      e.preventDefault();
+      document.getElementById('login-required-modal').style.display = 'flex';
+      return false;
+    }
+
+    // Specs recommandées selon mots-clés dans le nom/desc
+    function getSpecs(name, desc) {
+      var text = (name + ' ' + (desc || '')).toLowerCase();
+      // Jeux légers
+      var isLight = /minecraft|terraria|stardew|among|roblox|2d|pixel|indie/.test(text);
+      // Jeux lourds
+      var isHeavy = /gta|cyberpunk|witcher|battlefield|call of duty|cod|warzone|elden|hogwarts|star wars|assassin|far cry|red dead|rdr/.test(text);
+      // Jeux moyens
+      var isMid = /fortnite|valorant|apex|overwatch|league|lol|csgo|cs2|pubg|minecraft dungeons/.test(text);
+
+      if (isLight) return {
+        cpu: { rec: 'Intel Core i3 / Ryzen 3', min: 'Dual-core 2.0 GHz' },
+        gpu: { rec: 'GTX 1050 / RX 560', min: 'Intel HD 4000' },
+        ram: { rec: '8 Go', min: '4 Go' },
+        storage: { rec: '10 Go SSD', min: '5 Go HDD' },
+        os: { rec: 'Windows 10 64-bit', min: 'Windows 7 64-bit' }
+      };
+      if (isHeavy) return {
+        cpu: { rec: 'Intel i7-10700K / Ryzen 7 5800X', min: 'Intel i5-8600K / Ryzen 5 3600' },
+        gpu: { rec: 'RTX 3070 / RX 6700 XT', min: 'GTX 1060 6Go / RX 580' },
+        ram: { rec: '16 Go DDR4', min: '8 Go DDR4' },
+        storage: { rec: '100 Go NVMe SSD', min: '70 Go HDD' },
+        os: { rec: 'Windows 11 64-bit', min: 'Windows 10 64-bit' }
+      };
+      if (isMid) return {
+        cpu: { rec: 'Intel i5-10400 / Ryzen 5 5600', min: 'Intel i3-9100 / Ryzen 3 3300X' },
+        gpu: { rec: 'GTX 1660 Super / RX 5600 XT', min: 'GTX 1050 Ti / RX 570' },
+        ram: { rec: '16 Go DDR4', min: '8 Go DDR4' },
+        storage: { rec: '50 Go SSD', min: '30 Go HDD' },
+        os: { rec: 'Windows 10 64-bit', min: 'Windows 10 64-bit' }
+      };
+      // Défaut moyen
+      return {
+        cpu: { rec: 'Intel i5-9600K / Ryzen 5 3600', min: 'Intel i3-8100 / Ryzen 3 2200G' },
+        gpu: { rec: 'GTX 1660 / RX 5500 XT', min: 'GTX 1050 Ti / RX 570' },
+        ram: { rec: '12 Go DDR4', min: '8 Go DDR4' },
+        storage: { rec: '50 Go SSD', min: '30 Go HDD' },
+        os: { rec: 'Windows 10 64-bit', min: 'Windows 8.1 64-bit' }
+      };
+    }
+
+    // Générer l'ID YouTube de recherche automatique
+    function ytSearchEmbed(query, suffix) {
+      // On utilise youtube-nocookie avec une recherche
+      var q = encodeURIComponent(query + ' ' + suffix);
+      return 'https://www.youtube-nocookie.com/embed?listType=search&list=' + q;
+    }
+
+    function ytIdEmbed(idOrUrl) {
+      if (!idOrUrl) return null;
+      // Si c'est déjà un ID court (11 chars)
+      if (/^[a-zA-Z0-9_-]{11}$/.test(idOrUrl)) return 'https://www.youtube-nocookie.com/embed/' + idOrUrl;
+      // Si c'est une URL youtube
+      var m = idOrUrl.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
+      if (m) return 'https://www.youtube-nocookie.com/embed/' + m[1];
+      return null;
+    }
+
+    function renderGame(g) {
+      var specs = getSpecs(g.name, g.desc);
+      var trailerSrc = ytIdEmbed(g.trailer) || ytSearchEmbed(g.name, 'official trailer');
+      var gameplaySrc = ytIdEmbed(g.gameplay) || ytSearchEmbed(g.name, 'gameplay 2024');
+
+      var specItems = [
+        { icon:'🖥️', label:'Processeur', rec: specs.cpu.rec, min: specs.cpu.min },
+        { icon:'🎮', label:'Carte graphique', rec: specs.gpu.rec, min: specs.gpu.min },
+        { icon:'💾', label:'RAM', rec: specs.ram.rec, min: specs.ram.min },
+        { icon:'💿', label:'Stockage', rec: specs.storage.rec, min: specs.storage.min },
+        { icon:'🪟', label:'Système', rec: specs.os.rec, min: specs.os.min }
+      ];
+
+      document.title = 'Numilion — ' + g.name;
+
+      document.getElementById('game-content').innerHTML =
+        '<div class="game-hero">'
+        + '<div class="game-cover">'
+        + (g.img ? '<img src="' + g.img + '" alt="' + g.name + '" onerror="this.parentElement.innerHTML=\'<div class=game-cover-placeholder>🎮</div>\'"/>'
+                 : '<div class="game-cover-placeholder">🎮</div>')
+        + '</div>'
+        + '<div class="game-info-box">'
+        + '<div class="game-title">' + g.name + '</div>'
+        + (g.desc ? '<div class="game-desc">' + g.desc + '</div>' : '')
+        + (g.dl ? '<a href="' + g.dl + '" class="game-dl-btn" onclick="return checkLogin(event)">⬇️ Telecharger</a>' : '')
+        + '</div>'
+        + '</div>'
+
+        + '<div class="section-block">'
+        + '<h2>🎬 Vidéos</h2>'
+        + '<div class="videos-grid">'
+        + '<div><div style="font-size:0.8rem;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Bande annonce</div>'
+        + '<div class="video-wrap"><iframe src="' + trailerSrc + '" allowfullscreen loading="lazy"></iframe></div></div>'
+        + '<div><div style="font-size:0.8rem;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Gameplay</div>'
+        + '<div class="video-wrap"><iframe src="' + gameplaySrc + '" allowfullscreen loading="lazy"></iframe></div></div>'
+        + '</div>'
+        + '</div>'
+
+        + '<div class="section-block">'
+        + '<h2>💻 Composants recommandés</h2>'
+        + '<div class="specs-grid">'
+        + specItems.map(function(s) {
+            return '<div class="spec-card">'
+              + '<div class="spec-icon">' + s.icon + '</div>'
+              + '<div class="spec-label">' + s.label + '</div>'
+              + '<div class="spec-value">' + s.rec + '</div>'
+              + '<div class="spec-min">Min : ' + s.min + '</div>'
+              + '</div>';
+          }).join('')
+        + '</div>'
+        + '</div>';
+    }
+
+    // Charger le jeu depuis Firebase
+    var params = new URLSearchParams(window.location.search);
+    var gameId = params.get('id');
+    if (!gameId) {
+      document.getElementById('game-content').innerHTML = '<div class="loading">Jeu introuvable.</div>';
+    } else {
+      db.ref('games/' + gameId).once('value', function(snap) {
+        var g = snap.val();
+        if (!g) { document.getElementById('game-content').innerHTML = '<div class="loading">Jeu introuvable.</div>'; return; }
+        renderGame(g);
+        // Incrémenter les vues
+        db.ref('games/' + gameId + '/views').transaction(function(v) { return (v || 0) + 1; });
+      });
+    }
+  </script>
+  <script>
+  (function(){
+    var c=document.getElementById('wave-canvas'),ctx=c.getContext('2d'),t=0,lines=[];
+    function resize(){c.width=window.innerWidth;c.height=window.innerHeight;lines=[];for(var i=0;i<120;i++)lines.push({angle:(Math.PI*2/120)*i,speed:0.2+Math.random()*0.6,len:0.3+Math.random()*0.7,width:0.5+Math.random()*2,offset:Math.random()*100});}
+    resize();window.addEventListener('resize',resize);
+    function draw(){var w=c.width,h=c.height,cx=w/2,cy=h/2,maxR=Math.sqrt(cx*cx+cy*cy);ctx.fillStyle='#0d0d0d';ctx.fillRect(0,0,w,h);lines.forEach(function(l){var p=((t*l.speed+l.offset)%100)/100,r1=maxR*p,r2=maxR*(p+l.len*0.15),a=Math.sin(p*Math.PI)*0.5;ctx.beginPath();ctx.moveTo(cx+Math.cos(l.angle)*r1,cy+Math.sin(l.angle)*r1);ctx.lineTo(cx+Math.cos(l.angle)*r2,cy+Math.sin(l.angle)*r2);ctx.strokeStyle='rgba(255,255,255,'+a+')';ctx.lineWidth=l.width;ctx.stroke();});t+=0.08;requestAnimationFrame(draw);}
+    draw();
+  })();
+  </script>
+  <script>
+    (function(){
+      var session=JSON.parse(localStorage.getItem('numilion_session')||'null');
+      if(!session)return;
+      var loginBtn=document.getElementById('nav-login-btn');
+      var navUser=document.getElementById('nav-user');
+      if(loginBtn)loginBtn.style.display='none';
+      var avatar=session.avatar||(session.role==='admin'?(localStorage.getItem('numilion_avatar')||'https://i.imgur.com/lRqkh3u.jpeg'):null);
+      var avatarHTML=avatar?'<img src="'+avatar+'" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>':'👤';
+      var adminLink=session.role==='admin'?'<a href="admin.html">Panel Admin</a>':'';
+      navUser.innerHTML='<div class="profile-wrap" id="profile-wrap"><div class="profile-avatar-btn" id="avatar-btn">'+avatarHTML+'</div><div class="profile-dropdown" id="profile-dropdown"><div class="pd-name">👋 '+session.user+'</div>'+adminLink+(session.role!=='admin'?'<a href="profil.html">⚙️ Mon Profil</a>':'')+'<button class="pd-logout" onclick="localStorage.removeItem(\'numilion_session\');window.location.href=\'login.html\'">Déconnexion</button></div></div>';
+      document.getElementById('avatar-btn').addEventListener('click',function(e){e.stopPropagation();document.getElementById('profile-dropdown').classList.toggle('open');});
+      document.addEventListener('click',function(){var dd=document.getElementById('profile-dropdown');if(dd)dd.classList.remove('open');});
+    })();
+  </script>
+</body>
+</html>

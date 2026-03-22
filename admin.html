@@ -155,6 +155,14 @@
           <label>Description</label>
           <input type="text" id="game-desc" placeholder="Courte description"/>
         </div>
+        <div>
+          <label>Bande annonce (URL YouTube)</label>
+          <input type="url" id="game-trailer" placeholder="https://youtube.com/watch?v=..."/>
+        </div>
+        <div>
+          <label>Gameplay (URL YouTube)</label>
+          <input type="url" id="game-gameplay" placeholder="https://youtube.com/watch?v=..."/>
+        </div>
       </div>
       <button class="btn-primary" style="width:auto;padding:12px 36px;margin-top:6px" onclick="addGame()">Ajouter</button>
     </div>
@@ -231,38 +239,33 @@
     }
 
     function addGame() {
-      const name = document.getElementById('game-name').value.trim();
-      const img  = document.getElementById('game-img').value.trim();
-      const dl   = document.getElementById('game-dl').value.trim();
-      const desc = document.getElementById('game-desc').value.trim();
-      const msg  = document.getElementById('add-msg');
+      const name    = document.getElementById('game-name').value.trim();
+      const img     = document.getElementById('game-img').value.trim();
+      const dl      = document.getElementById('game-dl').value.trim();
+      const desc    = document.getElementById('game-desc').value.trim();
+      const trailer = document.getElementById('game-trailer').value.trim();
+      const gameplay= document.getElementById('game-gameplay').value.trim();
+      const msg     = document.getElementById('add-msg');
       if (!name) { showMsg(msg, 'error', 'Le nom est obligatoire.'); return; }
-      if (!dl)   { 
-        const game = { id: Date.now(), name, img, dl: '', desc, views: 0, downloads: 0 };
-        saveGameToFirebase(game);
-        showMsg(msg, 'success', '"'+name+'" ajouté !');
-        ['game-name','game-img','game-dl','game-desc'].forEach(id => document.getElementById(id).value = '');
-        return;
+      const clearForm = () => ['game-name','game-img','game-dl','game-desc','game-trailer','game-gameplay'].forEach(id => document.getElementById(id).value = '');
+      if (!dl) {
+        saveGameToFirebase({ id: Date.now(), name, img, dl: '', desc, trailer, gameplay, views: 0, downloads: 0 });
+        showMsg(msg, 'success', '"'+name+'" ajouté !'); clearForm(); return;
       }
       showMsg(msg, 'success', 'Création du lien lockr...');
       fetch('https://numilion.ayoubghe2010.workers.dev/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: name, target: dl })
       })
       .then(r => r.json())
       .then(data => {
         const lockrUrl = data.data && data.data.id ? 'https://lockr.so/' + data.data.id : dl;
-        const game = { id: Date.now(), name, img, dl: lockrUrl, desc, views: 0, downloads: 0 };
-        saveGameToFirebase(game);
-        showMsg(msg, 'success', '"'+name+'" ajouté avec lien lockr !');
-        ['game-name','game-img','game-dl','game-desc'].forEach(id => document.getElementById(id).value = '');
+        saveGameToFirebase({ id: Date.now(), name, img, dl: lockrUrl, desc, trailer, gameplay, views: 0, downloads: 0 });
+        showMsg(msg, 'success', '"'+name+'" ajouté avec lien lockr !'); clearForm();
       })
       .catch(() => {
-        const game = { id: Date.now(), name, img, dl, desc, views: 0, downloads: 0 };
-        saveGameToFirebase(game);
-        showMsg(msg, 'success', '"'+name+'" ajouté !');
-        ['game-name','game-img','game-dl','game-desc'].forEach(id => document.getElementById(id).value = '');
+        saveGameToFirebase({ id: Date.now(), name, img, dl, desc, trailer, gameplay, views: 0, downloads: 0 });
+        showMsg(msg, 'success', '"'+name+'" ajouté !'); clearForm();
       });
     }
 
@@ -281,6 +284,8 @@
           <input type="text" id="edit-img-${g.id}" value="${g.img||''}" placeholder="URL image" style="padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:inherit;font-size:0.9rem"/>
           <input type="text" id="edit-dl-${g.id}" value="${g.dl||''}" placeholder="Lien téléchargement" style="padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:inherit;font-size:0.9rem"/>
           <input type="text" id="edit-desc-${g.id}" value="${g.desc||''}" placeholder="Description" style="padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:inherit;font-size:0.9rem"/>
+          <input type="text" id="edit-trailer-${g.id}" value="${g.trailer||''}" placeholder="Bande annonce YouTube (URL)" style="padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:inherit;font-size:0.9rem"/>
+          <input type="text" id="edit-gameplay-${g.id}" value="${g.gameplay||''}" placeholder="Gameplay YouTube (URL)" style="padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:inherit;font-size:0.9rem"/>
           <div style="display:flex;gap:8px">
             <button class="btn-sm btn-primary" style="background:linear-gradient(135deg,#e94560,#a855f7);color:#fff;border:none" onclick="saveEdit(${g.id})">✅ Sauvegarder</button>
             <button class="btn-sm btn-outline" onclick="startPanel()">Annuler</button>
@@ -289,12 +294,14 @@
     }
 
     function saveEdit(id) {
-      const name = document.getElementById('edit-name-'+id).value.trim();
-      const img  = document.getElementById('edit-img-'+id).value.trim();
-      const dl   = document.getElementById('edit-dl-'+id).value.trim();
-      const desc = document.getElementById('edit-desc-'+id).value.trim();
+      const name     = document.getElementById('edit-name-'+id).value.trim();
+      const img      = document.getElementById('edit-img-'+id).value.trim();
+      const dl       = document.getElementById('edit-dl-'+id).value.trim();
+      const desc     = document.getElementById('edit-desc-'+id).value.trim();
+      const trailer  = document.getElementById('edit-trailer-'+id).value.trim();
+      const gameplay = document.getElementById('edit-gameplay-'+id).value.trim();
       if (!name) return;
-      db.ref('games/'+id).update({ name, img, dl, desc });
+      db.ref('games/'+id).update({ name, img, dl, desc, trailer, gameplay });
     }
 
     function acceptRequest(id, name, img) {
