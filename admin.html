@@ -205,8 +205,7 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
           if (data.appid && data.cover) {
-            // Toujours chercher une description via YouTube (plus fiable)
-            fallbackDescYouTube(name, data.cover, btn);
+            applyAutoFill(data.cover, data.desc || '', btn);
           } else {
             fallbackYouTube(name, btn);
           }
