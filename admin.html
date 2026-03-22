@@ -398,6 +398,11 @@
       db.ref('games/'+id).update({ name, img, dl, desc, trailer, gameplay });
     }
 
+    function deleteRequest(id) {
+      if (!confirm('Supprimer cette demande ?')) return;
+      db.ref('requests/' + id).remove();
+    }
+
     function acceptRequest(id, name, img) {
       db.ref('requests/'+id).once('value').then(function(snap) {
         var r = snap.val();
@@ -495,7 +500,9 @@
             + (r.status==='pending' ? '<div class="game-actions">'
               + '<button class="btn-sm" style="background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.3)" onclick="acceptRequest('+r.id+',\''+r.name+'\',\''+r.img+'\')">✅ Accepter</button>'
               + '<button class="btn-sm btn-danger" onclick="rejectRequest('+r.id+',\''+r.user+'\',\''+r.name+'\')">❌ Refuser</button>'
-              + '</div>' : '')
+              + '<button class="btn-sm btn-danger" onclick="deleteRequest('+r.id+')">🗑</button>'
+              + '</div>'
+              : '<div class="game-actions"><button class="btn-sm btn-danger" onclick="deleteRequest('+r.id+')">🗑 Supprimer</button></div>')
             + '</div></div>';
         }).join('');
       });
