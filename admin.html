@@ -206,13 +206,27 @@
           if (data.items && data.items.length > 0) {
             var game = data.items[0];
             var appid = game.id;
-            // Couverture Steam en grand format (600x900 portrait ou 460x215 landscape)
             var cover = 'https://cdn.cloudflare.steamstatic.com/steam/apps/' + appid + '/library_600x900.jpg';
-            var desc = game.name.replace(/[™®]/g, '').trim().split(/\s+/).slice(0, 5).join(' ');
 
-            applyAutoFill(cover, desc, btn);
+            // Récupérer les détails du jeu pour la vraie description
+            fetch('https://store.steampowered.com/api/appdetails?appids=' + appid + '&l=french&cc=FR')
+              .then(function(r) { return r.json(); })
+              .then(function(detail) {
+                var desc = '';
+                var d = detail[appid] && detail[appid].data;
+                if (d && d.short_description) {
+                  // Prendre les 8 premiers mots de la description officielle
+                  desc = d.short_description.replace(/<[^>]+>/g, '').replace(/[™®]/g, '').trim().split(/\s+/).slice(0, 8).join(' ');
+                } else {
+                  desc = game.name.replace(/[™®]/g, '').trim().split(/\s+/).slice(0, 5).join(' ');
+                }
+                applyAutoFill(cover, desc, btn);
+              })
+              .catch(function() {
+                var desc = game.name.replace(/[™®]/g, '').trim().split(/\s+/).slice(0, 5).join(' ');
+                applyAutoFill(cover, desc, btn);
+              });
           } else {
-            // Fallback YouTube si pas trouvé sur Steam
             fallbackYouTube(name, btn);
           }
         })
