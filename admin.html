@@ -166,6 +166,22 @@
           </div>
         </div>
         <div>
+          <label>Catégorie</label>
+          <select id="game-category" style="width:100%;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:0.95rem;margin-bottom:18px;font-family:inherit;cursor:pointer">
+            <option value="">— Choisir —</option>
+            <option value="action">⚔️ Action</option>
+            <option value="fps">🔫 FPS</option>
+            <option value="rpg">🧙 RPG</option>
+            <option value="aventure">🗺️ Aventure</option>
+            <option value="sport">⚽ Sport</option>
+            <option value="course">🏎️ Course</option>
+            <option value="horreur">👻 Horreur</option>
+            <option value="simulation">🏗️ Simulation</option>
+            <option value="strategie">♟️ Stratégie</option>
+            <option value="indie">🎨 Indie</option>
+          </select>
+        </div>
+        <div>
           <label>Bande annonce (URL YouTube)</label>
           <input type="url" id="game-trailer" placeholder="https://youtube.com/watch?v=..."/>
         </div>
@@ -336,17 +352,18 @@
     }
 
     function addGame() {
-      const name    = document.getElementById('game-name').value.trim();
-      const img     = document.getElementById('game-img').value.trim();
-      const dl      = document.getElementById('game-dl').value.trim();
-      const desc    = document.getElementById('game-desc').value.trim();
-      const trailer = document.getElementById('game-trailer').value.trim();
-      const gameplay= document.getElementById('game-gameplay').value.trim();
-      const msg     = document.getElementById('add-msg');
+      const name     = document.getElementById('game-name').value.trim();
+      const img      = document.getElementById('game-img').value.trim();
+      const dl       = document.getElementById('game-dl').value.trim();
+      const desc     = document.getElementById('game-desc').value.trim();
+      const trailer  = document.getElementById('game-trailer').value.trim();
+      const gameplay = document.getElementById('game-gameplay').value.trim();
+      const category = document.getElementById('game-category').value;
+      const msg      = document.getElementById('add-msg');
       if (!name) { showMsg(msg, 'error', 'Le nom est obligatoire.'); return; }
-      const clearForm = () => ['game-name','game-img','game-dl','game-desc','game-trailer','game-gameplay'].forEach(id => document.getElementById(id).value = '');
+      const clearForm = () => ['game-name','game-img','game-dl','game-desc','game-trailer','game-gameplay'].forEach(id => { document.getElementById(id).value = ''; });
       if (!dl) {
-        saveGameToFirebase({ id: Date.now(), name, img, dl: '', desc, trailer, gameplay, views: 0, downloads: 0 });
+        saveGameToFirebase({ id: Date.now(), name, img, dl: '', desc, trailer, gameplay, category, views: 0, downloads: 0 });
         showMsg(msg, 'success', '"'+name+'" ajouté !'); clearForm(); return;
       }
       showMsg(msg, 'success', 'Création du lien lockr...');
@@ -357,11 +374,11 @@
       .then(r => r.json())
       .then(data => {
         const lockrUrl = data.data && data.data.id ? 'https://lockr.so/' + data.data.id : dl;
-        saveGameToFirebase({ id: Date.now(), name, img, dl: lockrUrl, desc, trailer, gameplay, views: 0, downloads: 0 });
+        saveGameToFirebase({ id: Date.now(), name, img, dl: lockrUrl, desc, trailer, gameplay, category, views: 0, downloads: 0 });
         showMsg(msg, 'success', '"'+name+'" ajouté avec lien lockr !'); clearForm();
       })
       .catch(() => {
-        saveGameToFirebase({ id: Date.now(), name, img, dl, desc, trailer, gameplay, views: 0, downloads: 0 });
+        saveGameToFirebase({ id: Date.now(), name, img, dl, desc, trailer, gameplay, category, views: 0, downloads: 0 });
         showMsg(msg, 'success', '"'+name+'" ajouté !'); clearForm();
       });
     }

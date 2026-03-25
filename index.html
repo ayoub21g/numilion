@@ -46,7 +46,20 @@
   <main>
     <section id="jeux">
       <div class="search-wrap">
-        <input type="text" id="search-input" placeholder="🔍 Rechercher un jeu..." oninput="filterGames(this.value)"/>
+        <input type="text" id="search-input" placeholder="🔍 Rechercher un jeu..." oninput="applyFilters()"/>
+      </div>
+      <div id="filter-bar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;margin-top:-8px">
+        <button class="filter-btn active" data-cat="tous" onclick="setFilter(this)">🕹️ Tous</button>
+        <button class="filter-btn" data-cat="action" onclick="setFilter(this)">⚔️ Action</button>
+        <button class="filter-btn" data-cat="fps" onclick="setFilter(this)">🔫 FPS</button>
+        <button class="filter-btn" data-cat="rpg" onclick="setFilter(this)">🧙 RPG</button>
+        <button class="filter-btn" data-cat="aventure" onclick="setFilter(this)">🗺️ Aventure</button>
+        <button class="filter-btn" data-cat="sport" onclick="setFilter(this)">⚽ Sport</button>
+        <button class="filter-btn" data-cat="course" onclick="setFilter(this)">🏎️ Course</button>
+        <button class="filter-btn" data-cat="horreur" onclick="setFilter(this)">👻 Horreur</button>
+        <button class="filter-btn" data-cat="simulation" onclick="setFilter(this)">🏗️ Simulation</button>
+        <button class="filter-btn" data-cat="strategie" onclick="setFilter(this)">♟️ Stratégie</button>
+        <button class="filter-btn" data-cat="indie" onclick="setFilter(this)">🎨 Indie</button>
       </div>
       <p class="section-title">🕹️ Tous les jeux</p>
       <div id="custom-games-section">
@@ -99,6 +112,9 @@
     <button onclick="document.getElementById('discord-popup').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.6);font-size:1.1rem;cursor:pointer;padding:0;margin-left:4px;flex-shrink:0">✕</button>
   </div>
   <style>
+    .filter-btn { padding:8px 16px; border-radius:50px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#888; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.2s; white-space:nowrap; }
+    .filter-btn:hover { background:rgba(255,255,255,0.1); color:#fff; }
+    .filter-btn.active { background:linear-gradient(135deg,rgba(233,69,96,0.25),rgba(168,85,247,0.25)); border-color:rgba(233,69,96,0.5); color:#fff; }
     @keyframes slideUp {
       from { transform: translateY(100px); opacity: 0; }
       to   { transform: translateY(0);    opacity: 1; }
@@ -250,6 +266,48 @@
 
     var GAMES_PER_PAGE = 20;
     var allGames = [];
+    var activeFilter = 'tous';
+
+    function setFilter(btn) {
+      document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      activeFilter = btn.getAttribute('data-cat');
+      applyFilters();
+    }
+
+    function applyFilters() {
+      var q = (document.getElementById('search-input').value || '').toLowerCase();
+      var filtered = allGames.filter(function(g) {
+        var matchSearch = !q || g.name.toLowerCase().includes(q) || (g.desc||'').toLowerCase().includes(q);
+        var matchCat = activeFilter === 'tous' || (g.category||'').toLowerCase() === activeFilter
+          || autoCategory(g.name, g.desc) === activeFilter;
+        return matchSearch && matchCat;
+      });
+      var grid = document.getElementById('custom-games-grid');
+      if (!filtered.length) {
+        grid.innerHTML = '<div class="empty-msg">Aucun jeu trouvé.</div>';
+        document.getElementById('pagination').style.display = 'none';
+        return;
+      }
+      grid.innerHTML = filtered.slice(0, GAMES_PER_PAGE).map(makeCard).join('');
+      document.getElementById('pagination').style.display = 'none';
+    }
+
+    // Détection auto de catégorie si pas définie
+    function autoCategory(name, desc) {
+      var t = (name + ' ' + (desc||'')).toLowerCase();
+      if (/fps|shooter|call of duty|cod|counter|csgo|cs2|valorant|battlefield|warzone|halo/.test(t)) return 'fps';
+      if (/horror|horreur|scary|outlast|resident evil|silent hill|amnesia/.test(t)) return 'horreur';
+      if (/rpg|role|witcher|elden|skyrim|dragon ball|final fantasy|persona/.test(t)) return 'rpg';
+      if (/sport|fifa|nba|football|basketball|tennis|golf/.test(t)) return 'sport';
+      if (/race|course|forza|nfs|need for speed|f1|karting/.test(t)) return 'course';
+      if (/simulation|sims|farming|city|builder|tycoon/.test(t)) return 'simulation';
+      if (/strateg|chess|civilization|age of empire|starcraft/.test(t)) return 'strategie';
+      if (/indie|pixel|terraria|stardew|hollow|celeste|undertale/.test(t)) return 'indie';
+      if (/adventure|aventure|zelda|uncharted|tomb raider/.test(t)) return 'aventure';
+      if (/action|gta|assassin|batman|spider|marvel/.test(t)) return 'action';
+      return 'autres';
+    }
 
     function makeCard(g) {
       return '<div class="game-card" onclick="window.location.href=\'game.html?id='+g.id+'\'" style="cursor:pointer">'
@@ -270,21 +328,7 @@
         document.getElementById('pagination').style.display = 'none';
         return;
       }
-      var page1 = games.slice(0, GAMES_PER_PAGE);
-      grid.innerHTML = page1.map(makeCard).join('');
-
-      var totalPages = Math.ceil(games.length / GAMES_PER_PAGE);
-      var pag = document.getElementById('pagination');
-      if (totalPages > 1) {
-        pag.style.display = 'flex';
-        var html = '<span class="pag-info">Page 1 / ' + totalPages + '</span>';
-        for (var i = 1; i <= totalPages; i++) {
-          html += '<a href="' + (i === 1 ? 'index.html' : 'jeux' + i + '.html') + '" class="pag-btn' + (i === 1 ? ' active' : '') + '">' + i + '</a>';
-        }
-        pag.innerHTML = html;
-      } else {
-        pag.style.display = 'none';
-      }
+      applyFilters();
     });
 
     trackVisit();
