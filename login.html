@@ -193,15 +193,18 @@
       const pass = document.getElementById('reg-pass').value;
       if (!user || !pass) { showMsg('error', 'Remplis tous les champs.'); return; }
       if (pass.length < 4) { showMsg('error', 'Mot de passe trop court (min 4 caractères).'); return; }
-      if (user === ADMIN_USER) { showMsg('error', 'Ce nom d\'utilisateur est réservé.'); return; }
 
-      getUserFromFirebase(user, function(existing) {
-        if (existing) { showMsg('error', 'Ce pseudo est déjà pris.'); return; }
-        var newUser = { user: user, pass: pass, avatar: regAvatarData };
-        saveUserToFirebase(newUser);
-        localStorage.setItem('numilion_session', JSON.stringify({ user, role: 'user', avatar: regAvatarData }));
-        showMsg('success', 'Compte créé ! Redirection...');
-        setTimeout(() => window.location.href = 'index.html', 1000);
+      // Vérifier que c'est pas un nom d'admin
+      db.ref('admins/' + user).once('value', function(snap) {
+        if (snap.val()) { showMsg('error', 'Ce nom d\'utilisateur est réservé.'); return; }
+        getUserFromFirebase(user, function(existing) {
+          if (existing) { showMsg('error', 'Ce pseudo est déjà pris.'); return; }
+          var newUser = { user: user, pass: pass, avatar: regAvatarData };
+          saveUserToFirebase(newUser);
+          localStorage.setItem('numilion_session', JSON.stringify({ user, role: 'user', avatar: regAvatarData }));
+          showMsg('success', 'Compte créé ! Redirection...');
+          setTimeout(() => window.location.href = 'index.html', 1000);
+        });
       });
     }
 
