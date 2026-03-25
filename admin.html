@@ -202,6 +202,11 @@
       <h3>📬 Demandes de jeux (<span id="req-count">0</span>)</h3>
     </div>
     <div id="req-list"></div>
+
+    <div class="list-header" style="margin-top:32px">
+      <h3>👥 Utilisateurs (<span id="user-count">0</span>)</h3>
+    </div>
+    <div id="user-list"></div>
   </div>
 
   <script>
@@ -524,6 +529,37 @@
               + '</div>'
               : '<div class="game-actions"><button class="btn-sm btn-danger" onclick="deleteRequest('+r.id+')">🗑 Supprimer</button></div>')
             + '</div></div>';
+        }).join('');
+      });
+
+      // Utilisateurs en temps réel
+      loadUsers();
+    }
+
+    function deleteUser(username) {
+      if (!confirm('Supprimer l\'utilisateur "' + username + '" ?')) return;
+      db.ref('users/' + username).remove();
+      db.ref('notifications/' + username).remove();
+    }
+
+    function loadUsers() {
+      db.ref('users').on('value', function(snap) {
+        var users = [];
+        snap.forEach(function(c) { users.push(c.val()); });
+        document.getElementById('user-count').textContent = users.length;
+        var list = document.getElementById('user-list');
+        if (!users.length) { list.innerHTML = '<div class="empty-list">Aucun utilisateur.</div>'; return; }
+        list.innerHTML = users.map(function(u) {
+          var avatar = u.avatar
+            ? '<img src="' + u.avatar + '" onerror="this.parentElement.textContent=\'👤\'"/>'
+            : '👤';
+          return '<div class="game-item">'
+            + '<div class="game-thumb" style="border-radius:50%">' + avatar + '</div>'
+            + '<div class="game-info"><strong>' + u.user + '</strong><span>Compte utilisateur</span></div>'
+            + '<div class="game-meta"><div class="game-actions">'
+            + '<button class="btn-sm btn-danger" onclick="deleteUser(\'' + u.user + '\')">🗑 Supprimer</button>'
+            + '</div></div>'
+            + '</div>';
         }).join('');
       });
     }
