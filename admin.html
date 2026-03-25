@@ -160,7 +160,10 @@
         </div>
         <div class="form-full">
           <label>Description</label>
-          <input type="text" id="game-desc" placeholder="Courte description"/>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input type="text" id="game-desc" placeholder="Courte description" style="margin-bottom:0"/>
+            <button type="button" class="btn-sm btn-outline" style="flex-shrink:0;white-space:nowrap" onclick="document.getElementById('game-desc').value='';document.getElementById('game-img').value='';document.getElementById('autofill-preview').style.display='none'" title="Effacer">✕ Effacer</button>
+          </div>
         </div>
         <div>
           <label>Bande annonce (URL YouTube)</label>

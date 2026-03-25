@@ -31,7 +31,7 @@ export default {
         const appid = game.id;
         const cover = 'https://cdn.cloudflare.steamstatic.com/steam/apps/' + appid + '/library_600x900.jpg';
 
-        // 2. Récupérer la description courte
+        // 2. Récupérer genres + catégories pour une description courte
         let desc = '';
         try {
           const detailRes = await fetch(
@@ -39,8 +39,23 @@ export default {
           );
           const detailData = await detailRes.json();
           const d = detailData[appid] && detailData[appid].data;
-          if (d && d.short_description) {
-            desc = d.short_description.replace(/<[^>]+>/g, '').replace(/[™®]/g, '').trim().split(/\s+/).slice(0, 8).join(' ');
+          if (d) {
+            const keywords = [];
+            // Genres (ex: Action, RPG, Aventure)
+            if (d.genres) d.genres.slice(0, 3).forEach(g => keywords.push(g.description));
+            // Catégories (ex: Solo, Multijoueur, Coopératif)
+            if (d.categories) {
+              const cats = d.categories.map(c => c.description).filter(c =>
+                /solo|multi|co.op|coop|joueur|player/i.test(c)
+              ).slice(0, 2);
+              cats.forEach(c => keywords.push(c));
+            }
+            if (keywords.length > 0) {
+              desc = keywords.slice(0, 5).join(', ');
+            } else if (d.short_description) {
+              // Fallback : premiers mots de la description
+              desc = d.short_description.replace(/<[^>]+>/g, '').replace(/[™®]/g, '').trim().split(/\s+/).slice(0, 6).join(' ');
+            }
           }
         } catch (e) {}
 
