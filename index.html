@@ -30,6 +30,15 @@
     </div>
   </nav>
 
+  <!-- Bannière annonce -->
+  <div id="annonce-banner" style="background:linear-gradient(135deg,rgba(233,69,96,0.15),rgba(168,85,247,0.15));border-bottom:1px solid rgba(233,69,96,0.25);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:10">
+    <div style="display:flex;align-items:center;gap:10px;flex:1">
+      <span style="font-size:1.1rem;flex-shrink:0">📢</span>
+      <p style="color:#ccc;font-size:0.85rem;line-height:1.5;margin:0"><span style="color:#e94560;font-weight:700">Bonjour !</span> Pour vous prévenir que les jeux qui utilisent Rockstar, EA ou autre lanceur, ainsi que certains jeux en ligne, ne pourront pas être mis sur SteamTools. Nous essayons de trouver une autre alternative. Merci de votre compréhension.</p>
+    </div>
+    <button onclick="document.getElementById('annonce-banner').style.display='none'" style="background:none;border:none;color:#555;font-size:1.1rem;cursor:pointer;flex-shrink:0;padding:0">✕</button>
+  </div>
+
   <header>
     <div class="logo">
       <img src="standard-2.gif" alt="Numilion" style="width:90px;height:90px;border-radius:50%;margin-bottom:16px;filter:drop-shadow(0 0 20px rgba(255,160,0,0.5))"/>
