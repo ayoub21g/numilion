@@ -323,17 +323,16 @@
     // Détection auto de catégorie si pas définie
     function autoCategory(name, desc) {
       var t = (name + ' ' + (desc||'')).toLowerCase();
-      if (/fps|shooter|call of duty|cod|counter|csgo|cs2|valorant|battlefield|warzone|halo/.test(t)) return 'fps';
-      if (/horror|horreur|scary|outlast|resident evil|silent hill|amnesia/.test(t)) return 'horreur';
-      if (/rpg|role|witcher|elden|skyrim|dragon ball|final fantasy|persona/.test(t)) return 'rpg';
-      if (/sport|fifa|nba|football|basketball|tennis|golf/.test(t)) return 'sport';
-      if (/race|course|forza|nfs|need for speed|f1|karting/.test(t)) return 'course';
-      if (/simulation|sims|farming|city|builder|tycoon/.test(t)) return 'simulation';
-      if (/strateg|chess|civilization|age of empire|starcraft/.test(t)) return 'strategie';
-      if (/indie|pixel|terraria|stardew|hollow|celeste|undertale/.test(t)) return 'indie';
-      if (/adventure|aventure|zelda|uncharted|tomb raider/.test(t)) return 'aventure';
-      if (/action|gta|assassin|batman|spider|marvel/.test(t)) return 'action';
-      return 'autres';
+      if (/call of duty|cod |counter.strike|csgo|cs2|valorant|battlefield|warzone|apex legends|overwatch|rainbow six|titanfall|doom|far cry|borderlands|payday|pubg|playerunknown|insurgency|ready or not|superhot|metro|bioshock|wolfenstein|dishonored|deathloop|splitgate|xdefiant|the finals|hunt showdown|escape from tarkov|fps|shooter/.test(t)) return 'fps';
+      if (/resident evil|silent hill|outlast|amnesia|alien.isolation|dead space|evil within|visage|phasmophobia|little nightmares|soma|layers of fear|poppy|fnaf|five nights|granny|the forest|sons of the forest|dying light|back 4 blood|left 4 dead|l4d|dead by daylight|the quarry|until dawn|man of medan|horror|horreur|scary/.test(t)) return 'horreur';
+      if (/witcher|elden ring|skyrim|oblivion|fallout|dragon age|mass effect|cyberpunk|persona|final fantasy|dragon ball|dark souls|sekiro|nioh|monster hunter|divinity|baldur|pathfinder|pillars|kingdom come|greedfall|outriders|remnant|tales of|xenoblade|fire emblem|pokemon|diablo|path of exile|grim dawn|torchlight|last epoch|lost ark|rpg|role playing/.test(t)) return 'rpg';
+      if (/\bfifa\b|ea fc|ea sports fc|nba 2k|nba2k|efootball|pro evolution|madden|nhl |mlb |nfl |ufc \d|wwe 2k|tony hawk|skate \d|steep|riders republic|motogp|dirt \d|wrc |f1 \d|formula 1|basketball|football manager|sport/.test(t)) return 'sport';
+      if (/forza|need for speed|nfs |gran turismo|assetto corsa|project cars|iracing|wreckfest|burnout|flatout|trackmania|mario kart|crash team|hot wheels|fast.furious|racing|karting|the crew/.test(t)) return 'course';
+      if (/farming simulator|euro truck|american truck|flight simulator|msfs|x-plane|cities.skylines|planet coaster|planet zoo|two point|prison architect|rimworld|stardew valley|my time|slime rancher|powerwash|house flipper|car mechanic|bus simulator|train sim|the sims|simulator|tycoon/.test(t)) return 'simulation';
+      if (/civilization|civ \d|age of empires|starcraft|warcraft|total war|company of heroes|hearts of iron|crusader kings|europa universalis|victoria \d|stellaris|xcom|frostpunk|they are billions|anno \d|tropico|humankind|age of wonders|chess|strateg/.test(t)) return 'strategie';
+      if (/hollow knight|celeste|ori and|cuphead|shovel knight|undertale|deltarune|hades|dead cells|binding of isaac|enter the gungeon|risk of rain|noita|slay the spire|inscryption|among us|fall guys|goose game|terraria|minecraft|roblox|indie|pixel/.test(t)) return 'indie';
+      if (/zelda|uncharted|tomb raider|horizon|god of war|spider.man|spiderman|batman arkham|red dead|rdr|grand theft auto|gta |watch dogs|assassin.s creed|assassins creed|prince of persia|detroit become|heavy rain|a plague tale|the last of us|days gone|ghost of tsushima|adventure|aventure/.test(t)) return 'aventure';
+      return 'action';
     }
 
     function makeCard(g) {
