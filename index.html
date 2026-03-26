@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -66,7 +66,7 @@
         <div class="games-grid" id="custom-games-grid">
           <div class="empty-msg">Aucun jeu ajouté. Va dans le panel admin pour en ajouter.</div>
         </div>
-        <div id="pagination" style="display:none;justify-content:center;align-items:center;gap:8px;margin-top:36px;flex-wrap:wrap"></div>
+        <div id="pagination" style="justify-content:center;align-items:center;gap:8px;margin-top:36px;flex-wrap:wrap"></div>
       </div>
     </section>
   </main>
@@ -277,22 +277,40 @@
 
     function applyFilters() {
       var q = (document.getElementById('search-input').value || '').toLowerCase();
+      var grid = document.getElementById('custom-games-grid');
+      var pag = document.getElementById('pagination');
       var filtered = allGames.filter(function(g) {
         var matchSearch = !q || g.name.toLowerCase().includes(q) || (g.desc||'').toLowerCase().includes(q);
-        var matchCat = activeFilter === 'tous' || (g.category||'').toLowerCase() === activeFilter
-          || autoCategory(g.name, g.desc) === activeFilter;
+        var matchCat = activeFilter === 'tous' || (g.category||'').toLowerCase() === activeFilter || autoCategory(g.name, g.desc) === activeFilter;
         return matchSearch && matchCat;
       });
-      var grid = document.getElementById('custom-games-grid');
       if (!filtered.length) {
-        grid.innerHTML = '<div class="empty-msg">Aucun jeu trouvé.</div>';
-        document.getElementById('pagination').style.display = 'none';
+        grid.innerHTML = '<div class="empty-msg">Aucun jeu trouve.</div>';
+        pag.innerHTML = '';
+        pag.style.display = 'none';
         return;
       }
-      grid.innerHTML = filtered.slice(0, GAMES_PER_PAGE).map(makeCard).join('');
-      document.getElementById('pagination').style.display = 'none';
+      if (activeFilter === 'tous' && !q) {
+        grid.innerHTML = filtered.slice(0, GAMES_PER_PAGE).map(makeCard).join('');
+        var totalPages = Math.ceil(filtered.length / GAMES_PER_PAGE);
+        if (totalPages > 1) {
+          var html = '<span class="pag-info">Page 1 / ' + totalPages + '</span>';
+          for (var i = 1; i <= totalPages; i++) {
+            var href = i === 1 ? 'index.html' : 'jeux' + i + '.html';
+            html += '<a href="' + href + '" class="pag-btn' + (i === 1 ? ' active' : '') + '">' + i + '</a>';
+          }
+          pag.innerHTML = html;
+          pag.style.display = 'flex';
+        } else {
+          pag.innerHTML = '';
+          pag.style.display = 'none';
+        }
+      } else {
+        grid.innerHTML = filtered.map(makeCard).join('');
+        pag.innerHTML = '';
+        pag.style.display = 'none';
+      }
     }
-
     // Détection auto de catégorie si pas définie
     function autoCategory(name, desc) {
       var t = (name + ' ' + (desc||'')).toLowerCase();
