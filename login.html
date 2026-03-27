@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Numilion — Connexion</title>
   <link rel="stylesheet" href="style.css"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <!-- Firebase compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -94,7 +95,7 @@
       </div>
 
       <div class="tabs">
-        <button class="tab active" onclick="switchTab('login')">Connexion</button>
+        <button class="tab active" onclick="switchTab('login')"><i data-lucide="log-in" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i>Connexion</button>
         <button class="tab" onclick="switchTab('register')">Inscription</button>
       </div>
 
@@ -106,7 +107,7 @@
         <input type="text" id="login-user" placeholder="Ton pseudo"/>
         <label>Mot de passe</label>
         <input type="password" id="login-pass" placeholder="••••••••"/>
-        <button class="btn-submit" onclick="doLogin()">Se connecter</button>
+        <button class="btn-submit" onclick="doLogin()"><i data-lucide="log-in" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i>Se connecter</button>
       </div>
 
       <!-- INSCRIPTION -->
@@ -120,7 +121,7 @@
         <input type="text" id="reg-user" placeholder="Choisis un pseudo"/>
         <label>Mot de passe</label>
         <input type="password" id="reg-pass" placeholder="Crée un mot de passe"/>
-        <button class="btn-submit" onclick="doRegister()">Créer mon compte</button>
+        <button class="btn-submit" onclick="doRegister()"><i data-lucide="user-plus" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i>Créer mon compte</button>
       </div>
     </div>
   </div>
@@ -224,5 +225,6 @@
     document.addEventListener('keydown', e => { if (e.key === 'Enter') { if (!document.getElementById('tab-login').classList.contains('hidden')) doLogin(); else doRegister(); }});
   </script>
   <script src="script.js"></script>
+<script>document.addEventListener("DOMContentLoaded",function(){if(window.lucide)lucide.createIcons();});</script>
 </body>
 </html>

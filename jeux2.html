@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Numilion - Jeux — Page 2</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
   <canvas id="wave-canvas" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"></canvas>
@@ -14,13 +15,13 @@
     <div class="nav-inner">
       <span class="nav-logo"><img src="standard-2.gif" alt="Numilion" style="height:36px;vertical-align:middle;border-radius:50%"/> Numilion</span>
       <div class="nav-links">
-        <button onclick="document.getElementById('request-modal').style.display='flex'" class="nav-btn" style="cursor:pointer;border:none;background:rgba(233,69,96,0.15);color:#e94560;border:1px solid rgba(233,69,96,0.3)">🎮 Demander un jeu</button>
-        <a href="login.html" class="nav-btn" id="nav-login-btn">Connexion</a>
+        <button onclick="document.getElementById('request-modal').style.display='flex'" class="nav-btn" style="cursor:pointer;border:none;background:rgba(233,69,96,0.15);color:#e94560;border:1px solid rgba(233,69,96,0.3)">🎮 <i data-lucide="gamepad-2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px"></i>Demander un jeu</button>
+        <a href="login.html" class="nav-btn" id="nav-login-btn"><i data-lucide="log-in" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i>Connexion</a>
         <div id="nav-user"></div>
         <div id="nav-notif" style="display:none;position:relative">
           <button id="notif-btn" style="background:none;border:none;cursor:pointer;font-size:1.3rem;position:relative;padding:4px" onclick="toggleNotif()">🔔<span id="notif-badge" style="display:none;position:absolute;top:0;right:0;background:#e94560;color:#fff;font-size:0.6rem;font-weight:700;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center"></span></button>
           <div id="notif-dropdown" style="display:none;position:absolute;top:48px;right:0;background:#1c1c1c;border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:12px;min-width:280px;z-index:200;box-shadow:0 16px 40px rgba(0,0,0,0.5)">
-            <div style="font-size:0.85rem;font-weight:600;color:#eee;margin-bottom:10px">🔔 Notifications</div>
+            <div style="font-size:0.85rem;font-weight:600;color:#eee;margin-bottom:10px">🔔<i data-lucide="bell" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i> Notifications</div>
             <div id="notif-list"><div style="color:#555;font-size:0.85rem;text-align:center;padding:10px">Aucune notification</div></div>
           </div>
         </div>
@@ -35,9 +36,9 @@
     <h1>Numilion</h1>
     <div class="header-line"></div>
     <div class="header-stats">
-      <span>🟢 <b id="count-online">0</b> en ligne</span>
+      <span>🟢 <b id="count-online">0</b><i data-lucide="circle" style="width:10px;height:10px;fill:#2ecc71;color:#2ecc71;vertical-align:middle;margin-right:4px"></i> en ligne</span>
       <span class="hs-sep">·</span>
-      <span>👁 <b id="count-visits">0</b> visites</span>
+      <span>👁 <b id="count-visits">0</b><i data-lucide="eye" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i> visites</span>
     </div>
   </header>
 
@@ -72,7 +73,7 @@
   <div id="request-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
     <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:36px;width:100%;max-width:420px;position:relative">
       <button onclick="document.getElementById('request-modal').style.display='none'" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#666;font-size:1.3rem;cursor:pointer">✕</button>
-      <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:24px;background:linear-gradient(135deg,#e94560,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">🎮 Demander un jeu</h3>
+      <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:24px;background:linear-gradient(135deg,#e94560,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">🎮 <i data-lucide="gamepad-2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px"></i>Demander un jeu</h3>
       <div id="req-msg" style="display:none;padding:10px 14px;border-radius:10px;font-size:0.85rem;margin-bottom:14px"></div>
       <label style="display:block;color:#888;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nom du jeu</label>
       <input type="text" id="req-name" placeholder="Ex: GTA V" style="width:100%;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:0.95rem;margin-bottom:16px;font-family:inherit"/>
@@ -80,7 +81,7 @@
       <input type="text" id="req-img" placeholder="https://..." style="width:100%;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:0.95rem;margin-bottom:16px;font-family:inherit"/>
       <label style="display:block;color:#888;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Message (optionnel)</label>
       <input type="text" id="req-msg-text" placeholder="Pourquoi tu veux ce jeu ?" style="width:100%;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:0.95rem;margin-bottom:20px;font-family:inherit"/>
-      <button onclick="submitRequest()" style="width:100%;padding:13px;border-radius:50px;background:linear-gradient(135deg,#e94560,#a855f7);color:#fff;border:none;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit">Envoyer la demande</button>
+      <button onclick="submitRequest()" style="width:100%;padding:13px;border-radius:50px;background:linear-gradient(135deg,#e94560,#a855f7);color:#fff;border:none;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit"><i data-lucide="send" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i>Envoyer la demande</button>
     </div>
   </div>
 
@@ -163,7 +164,7 @@
       setTimeout(function(){ document.getElementById('request-modal').style.display='none'; msgBox.style.display='none'; document.getElementById('req-name').value=''; document.getElementById('req-img').value=''; document.getElementById('req-msg-text').value=''; }, 1500);
     }
 
-    // Notifications
+    //<i data-lucide="bell" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i> Notifications
     function toggleNotif() { var dd=document.getElementById('notif-dropdown'); dd.style.display=dd.style.display==='none'?'block':'none'; }
     document.addEventListener('click',function(e){ if(!document.getElementById('nav-notif').contains(e.target)){var dd=document.getElementById('notif-dropdown');if(dd)dd.style.display='none';}});
     (function(){
@@ -201,10 +202,11 @@
       var avatar=session.avatar||(session.role==='admin'?(localStorage.getItem('numilion_avatar')||'https://i.imgur.com/lRqkh3u.jpeg'):null);
       var avatarHTML=avatar?'<img src="'+avatar+'" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>':'👤';
       var adminLink=session.role==='admin'?'<a href="admin.html">Panel Admin</a>':'';
-      navUser.innerHTML='<div class="profile-wrap" id="profile-wrap"><div class="profile-avatar-btn" id="avatar-btn">'+avatarHTML+'</div><div class="profile-dropdown" id="profile-dropdown"><div class="pd-name">👋 '+session.user+'</div>'+adminLink+(session.role!=='admin'?'<a href="profil.html">⚙️ Mon Profil</a>':'')+'<button class="pd-logout" onclick="localStorage.removeItem(\'numilion_session\');window.location.href=\'login.html\'">Déconnexion</button></div></div>';
+      navUser.innerHTML='<div class="profile-wrap" id="profile-wrap"><div class="profile-avatar-btn" id="avatar-btn">'+avatarHTML+'</div><div class="profile-dropdown" id="profile-dropdown"><div class="pd-name">👋 '+session.user+'</div>'+adminLink+(session.role!=='admin'?'<a href="profil.html">⚙️ Mon Profil</a>':'')+'<button class="pd-logout" onclick="localStorage.removeItem(\'numilion_session\');window.location.href=\'login.html\'"><i data-lucide="log-out" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i>Déconnexion</button></div></div>';
       document.getElementById('avatar-btn').addEventListener('click',function(e){e.stopPropagation();document.getElementById('profile-dropdown').classList.toggle('open');});
       document.addEventListener('click',function(){var dd=document.getElementById('profile-dropdown');if(dd)dd.classList.remove('open');});
     })();
   </script>
+<script>document.addEventListener("DOMContentLoaded",function(){if(window.lucide)lucide.createIcons();});</script>
 </body>
 </html>

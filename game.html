@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Numilion — Jeu</title>
   <link rel="stylesheet" href="style.css"/>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
     .game-page { max-width:1000px; margin:0 auto; padding:32px 20px 80px; position:relative; z-index:1; }
     .back-btn { display:inline-flex; align-items:center; gap:6px; color:#666; font-size:0.85rem; text-decoration:none; margin-bottom:28px; transition:color 0.2s; }
@@ -58,7 +59,7 @@
     <div class="nav-inner">
       <span class="nav-logo"><img src="standard-2.gif" alt="Numilion" style="height:36px;vertical-align:middle;border-radius:50%"/> Numilion</span>
       <div class="nav-links">
-        <a href="login.html" class="nav-btn" id="nav-login-btn">Connexion</a>
+        <a href="login.html" class="nav-btn" id="nav-login-btn"><i data-lucide="log-in" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i>Connexion</a>
         <div id="nav-user"></div>
       </div>
     </div>
@@ -251,10 +252,11 @@
       var avatar=session.avatar||(session.role==='admin'?(localStorage.getItem('numilion_avatar')||'https://i.imgur.com/lRqkh3u.jpeg'):null);
       var avatarHTML=avatar?'<img src="'+avatar+'" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>':'👤';
       var adminLink=session.role==='admin'?'<a href="admin.html">Panel Admin</a>':'';
-      navUser.innerHTML='<div class="profile-wrap" id="profile-wrap"><div class="profile-avatar-btn" id="avatar-btn">'+avatarHTML+'</div><div class="profile-dropdown" id="profile-dropdown"><div class="pd-name">👋 '+session.user+'</div>'+adminLink+(session.role!=='admin'?'<a href="profil.html">⚙️ Mon Profil</a>':'')+'<button class="pd-logout" onclick="localStorage.removeItem(\'numilion_session\');window.location.href=\'login.html\'">Déconnexion</button></div></div>';
+      navUser.innerHTML='<div class="profile-wrap" id="profile-wrap"><div class="profile-avatar-btn" id="avatar-btn">'+avatarHTML+'</div><div class="profile-dropdown" id="profile-dropdown"><div class="pd-name">👋 '+session.user+'</div>'+adminLink+(session.role!=='admin'?'<a href="profil.html">⚙️ Mon Profil</a>':'')+'<button class="pd-logout" onclick="localStorage.removeItem(\'numilion_session\');window.location.href=\'login.html\'"><i data-lucide="log-out" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i>Déconnexion</button></div></div>';
       document.getElementById('avatar-btn').addEventListener('click',function(e){e.stopPropagation();document.getElementById('profile-dropdown').classList.toggle('open');});
       document.addEventListener('click',function(){var dd=document.getElementById('profile-dropdown');if(dd)dd.classList.remove('open');});
     })();
   </script>
+<script>document.addEventListener("DOMContentLoaded",function(){if(window.lucide)lucide.createIcons();});</script>
 </body>
 </html>

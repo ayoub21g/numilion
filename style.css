@@ -427,3 +427,7 @@ section { scroll-margin-top: 70px; }
 .pag-btn:hover { background: rgba(233,69,96,0.15); border-color: rgba(233,69,96,0.4); color: #e94560; }
 .pag-btn.active { background: linear-gradient(135deg,#e94560,#a855f7); border-color: transparent; color: #fff; }
 .pag-info { color: #555; font-size: 0.85rem; margin-right: 6px; }
+
+/* ── Lucide Icons ── */
+.lc-icon { display:inline-block; vertical-align:middle; flex-shrink:0; }
+.lc-icon svg { display:block; }
