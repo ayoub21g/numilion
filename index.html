@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Numilion - Jeux Gratuits</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
   <!-- Canvas fond vagues -->
@@ -22,7 +23,7 @@
         <div id="nav-notif" style="display:none;position:relative">
           <button id="notif-btn" style="background:none;border:none;cursor:pointer;font-size:1.3rem;position:relative;padding:4px" onclick="toggleNotif()"><i data-lucide="bell" style="width:20px;height:20px;vertical-align:middle"></i><span id="notif-badge" style="display:none;position:absolute;top:0;right:0;background:#e94560;color:#fff;font-size:0.6rem;font-weight:700;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center"></span></button>
           <div id="notif-dropdown" style="display:none;position:absolute;top:48px;right:0;background:#1c1c1c;border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:12px;min-width:280px;z-index:200;box-shadow:0 16px 40px rgba(0,0,0,0.5)">
-            <div style="font-size:0.85rem;font-weight:600;color:#eee;margin-bottom:10px"><i data-lucide="bell" style="width:20px;height:20px;vertical-align:middle"></i><i data-lucide="bell" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i> Notifications</div>
+            <div style="font-size:0.85rem;font-weight:600;color:#eee;margin-bottom:10px"><i data-lucide="bell" style="width:20px;height:20px;vertical-align:middle"></i> Notifications</div>
             <div id="notif-list"><div style="color:#555;font-size:0.85rem;text-align:center;padding:10px">Aucune notification</div></div>
           </div>
         </div>
@@ -58,17 +59,17 @@
         <input type="text" id="search-input" placeholder="Rechercher un jeu..." oninput="applyFilters()"/>
       </div>
       <div id="filter-bar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;margin-top:-8px">
-        <button class="filter-btn active" data-cat="tous" onclick="setFilter(this)"><i data-lucide="layout-grid" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i><i data-lucide="layout-grid" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Tous</button>
-        <button class="filter-btn" data-cat="action" onclick="setFilter(this)"><i data-lucide="sword" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i><i data-lucide="sword" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Action</button>
-        <button class="filter-btn" data-cat="fps" onclick="setFilter(this)"><i data-lucide="crosshair" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i><i data-lucide="crosshair" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>FPS</button>
-        <button class="filter-btn" data-cat="rpg" onclick="setFilter(this)"><i data-lucide="wand-2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i><i data-lucide="wand-2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>RPG</button>
-        <button class="filter-btn" data-cat="aventure" onclick="setFilter(this)"><i data-lucide="map" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i><i data-lucide="map" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Aventure</button>
-        <button class="filter-btn" data-cat="sport" onclick="setFilter(this)"><i data-lucide="trophy" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i><i data-lucide="trophy" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Sport</button>
-        <button class="filter-btn" data-cat="course" onclick="setFilter(this)"><i data-lucide="zap" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i><i data-lucide="zap" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Course</button>
-        <button class="filter-btn" data-cat="horreur" onclick="setFilter(this)"><i data-lucide="skull" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i><i data-lucide="skull" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Horreur</button>
-        <button class="filter-btn" data-cat="simulation" onclick="setFilter(this)"><i data-lucide="building-2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i><i data-lucide="building-2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Simulation</button>
+        <button class="filter-btn active" data-cat="tous" onclick="setFilter(this)"><i data-lucide="layout-grid" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Tous</button>
+        <button class="filter-btn" data-cat="action" onclick="setFilter(this)"><i data-lucide="sword" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Action</button>
+        <button class="filter-btn" data-cat="fps" onclick="setFilter(this)"><i data-lucide="crosshair" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>FPS</button>
+        <button class="filter-btn" data-cat="rpg" onclick="setFilter(this)"><i data-lucide="wand-2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>RPG</button>
+        <button class="filter-btn" data-cat="aventure" onclick="setFilter(this)"><i data-lucide="map" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Aventure</button>
+        <button class="filter-btn" data-cat="sport" onclick="setFilter(this)"><i data-lucide="trophy" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Sport</button>
+        <button class="filter-btn" data-cat="course" onclick="setFilter(this)"><i data-lucide="zap" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Course</button>
+        <button class="filter-btn" data-cat="horreur" onclick="setFilter(this)"><i data-lucide="skull" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Horreur</button>
+        <button class="filter-btn" data-cat="simulation" onclick="setFilter(this)"><i data-lucide="building-2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Simulation</button>
         <button class="filter-btn" data-cat="strategie" onclick="setFilter(this)"><i data-lucide="brain" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Stratégie</button>
-        <button class="filter-btn" data-cat="indie" onclick="setFilter(this)"><i data-lucide="palette" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i><i data-lucide="palette" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Indie</button>
+        <button class="filter-btn" data-cat="indie" onclick="setFilter(this)"><i data-lucide="palette" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Indie</button>
       </div>
       <p class="section-title"><i data-lucide="layout-grid" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i><i data-lucide="gamepad-2" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i>Tous les jeux</p>
       <div id="custom-games-section">
@@ -342,7 +343,7 @@
         + '</div>'
         + '<h2>' + g.name + '</h2>'
         + '<p>' + (g.desc || '') + '</p>'
-        + (g.dl ? '<a href="' + g.dl + '" class="dl-btn" onclick="event.stopPropagation();return checkLogin(event, this)"><i data-lucide="download" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i><i data-lucide="download" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i>Telecharger</a>' : '')
+        + (g.dl ? '<a href="' + g.dl + '" class="dl-btn" onclick="event.stopPropagation();return checkLogin(event, this)"><i data-lucide="download" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"></i>Telecharger</a>' : '')
         + '</div>';
     }
 
@@ -393,5 +394,6 @@
       });
     })();
   </script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

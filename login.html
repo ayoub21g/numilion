@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Numilion — Connexion</title>
   <link rel="stylesheet" href="style.css"/>
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <!-- Firebase compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -83,6 +82,7 @@
     .msg.success { background: rgba(46,204,113,0.1); color: #2ecc71; border: 1px solid rgba(46,204,113,0.2); }
     .hidden { display: none !important; }
   </style>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
   <div class="particles" id="particles"></div>
@@ -225,6 +225,6 @@
     document.addEventListener('keydown', e => { if (e.key === 'Enter') { if (!document.getElementById('tab-login').classList.contains('hidden')) doLogin(); else doRegister(); }});
   </script>
   <script src="script.js"></script>
-<script>document.addEventListener("DOMContentLoaded",function(){if(window.lucide)lucide.createIcons();});</script>
+<script>lucide.createIcons();</script>
 </body>
 </html>
