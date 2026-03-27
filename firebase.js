@@ -89,16 +89,5 @@ function countUsersFirebase(callback) {
 }
 
 // ── ADMINS ───────────────────────────────────────────────
-function initAdmins() {
-  db.ref('admins/ayoub').once('value', function(snap) {
-    if (!snap.val()) {
-      db.ref('admins/ayoub').set({ user: 'ayoub', pass: 'Louly2010@', avatar: 'https://i.imgur.com/lRqkh3u.jpeg' });
-    }
-  });
-  db.ref('admins/lertie').once('value', function(snap) {
-    if (!snap.val()) {
-      db.ref('admins/lertie').set({ user: 'lertie', pass: 'Ley@n93110', avatar: null });
-    }
-  });
-}
-initAdmins();
+// Les admins sont gérés côté serveur via le Cloudflare Worker
+// Les mots de passe ne sont jamais exposés côté client

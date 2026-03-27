@@ -170,16 +170,29 @@
       const pass = document.getElementById('login-pass').value;
       if (!user || !pass) { showMsg('error', 'Remplis tous les champs.'); return; }
 
-      // Vérifier d'abord si c'est un admin Firebase
-      db.ref('admins/' + user).once('value', function(snap) {
-        const admin = snap.val();
-        if (admin && admin.pass === pass) {
-          const avatar = localStorage.getItem('numilion_avatar_' + user) || admin.avatar || 'https://i.imgur.com/lRqkh3u.jpeg';
-          localStorage.setItem('numilion_session', JSON.stringify({ user: user, role: 'admin', avatar: avatar }));
+      // Vérifier d'abord si c'est un admin via le Worker (sécurisé)
+      fetch('https://numilion.ayoubghe2010.workers.dev/?admin_login=1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user, pass })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok) {
+          const avatar = localStorage.getItem('numilion_avatar_' + user) || data.avatar || 'https://i.imgur.com/lRqkh3u.jpeg';
+          localStorage.setItem('numilion_session', JSON.stringify({ user, role: 'admin', avatar }));
           window.location.href = 'index.html';
           return;
         }
-        // Sinon vérifier utilisateur normal
+        // Sinon vérifier utilisateur normal dans Firebase
+        getUserFromFirebase(user, function(found) {
+          if (!found || found.pass !== pass) { showMsg('error', 'Identifiants incorrects.'); return; }
+          localStorage.setItem('numilion_session', JSON.stringify({ user: found.user, role: 'user', avatar: found.avatar }));
+          window.location.href = 'index.html';
+        });
+      })
+      .catch(() => {
+        // Fallback utilisateur normal si Worker inaccessible
         getUserFromFirebase(user, function(found) {
           if (!found || found.pass !== pass) { showMsg('error', 'Identifiants incorrects.'); return; }
           localStorage.setItem('numilion_session', JSON.stringify({ user: found.user, role: 'user', avatar: found.avatar }));

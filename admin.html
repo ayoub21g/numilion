@@ -327,21 +327,29 @@
     function login() {
       const u = document.getElementById('username').value.trim();
       const p = document.getElementById('password').value;
-      if (!u || !p) { const err = document.getElementById('login-error'); err.textContent = 'Remplis tous les champs.'; err.classList.remove('hidden'); return; }
-      db.ref('admins/' + u).once('value', function(snap) {
-        const admin = snap.val();
-        if (admin && admin.pass === p) {
-          const avatar = localStorage.getItem('numilion_avatar_' + u) || admin.avatar || 'https://i.imgur.com/lRqkh3u.jpeg';
+      const err = document.getElementById('login-error');
+      if (!u || !p) { err.textContent = 'Remplis tous les champs.'; err.classList.remove('hidden'); return; }
+      err.classList.add('hidden');
+      // Vérification via Worker (mots de passe jamais exposés côté client)
+      fetch('https://numilion.ayoubghe2010.workers.dev/?admin_login=1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: u, pass: p })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok) {
+          const avatar = localStorage.getItem('numilion_avatar_' + u) || data.avatar || 'https://i.imgur.com/lRqkh3u.jpeg';
           localStorage.setItem('numilion_session', JSON.stringify({ user: u, role: 'admin', avatar }));
           document.getElementById('login-wrap').classList.add('hidden');
           document.getElementById('panel').classList.remove('hidden');
           startPanel();
         } else {
-          const err = document.getElementById('login-error');
-          err.textContent = 'Identifiants incorrects.';
+          err.textContent = data.error || 'Identifiants incorrects.';
           err.classList.remove('hidden');
         }
-      });
+      })
+      .catch(() => { err.textContent = 'Erreur de connexion.'; err.classList.remove('hidden'); });
     }
 
     function logout() {
