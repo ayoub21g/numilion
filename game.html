@@ -140,18 +140,20 @@
     }
 
     function searchYouTube(query, cb) {
-      fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&videoEmbeddable=true&q=' + encodeURIComponent(query) + '&key=' + YT_API_KEY)
-        .then(function(r){ return r.json(); })
-        .then(function(d){ cb(d.items && d.items.length ? d.items[0].id.videoId : null); })
-        .catch(function(){ cb(null); });
+      // Clé YouTube épuisée - on construit une URL de recherche YouTube directe
+      cb(null);
     }
 
-    function setVideoIframe(elId, videoId) {
+    function setVideoIframe(elId, videoId, query) {
       var wrap = document.getElementById(elId);
       if (!wrap) return;
-      wrap.innerHTML = videoId
-        ? '<iframe src="https://www.youtube-nocookie.com/embed/' + videoId + '?rel=0" allowfullscreen loading="lazy" style="width:100%;height:100%;border:none;display:block"></iframe>'
-        : '<div class="video-na">Vidéo non disponible</div>';
+      if (videoId) {
+        wrap.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + videoId + '?rel=0" allowfullscreen loading="lazy" style="width:100%;height:100%;border:none;display:block"></iframe>';
+      } else if (query) {
+        wrap.innerHTML = '<a href="https://www.youtube.com/results?search_query=' + encodeURIComponent(query) + '" target="_blank" rel="noopener" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#888;text-decoration:none;gap:10px;font-size:0.82rem;transition:color 0.2s" onmouseover="this.style.color=\'#e94560\'" onmouseout="this.style.color=\'#888\'"><svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-2.75 12.64 12.64 0 0 0-8.07 2.91A12.57 12.57 0 0 0 3.5 12a12.57 12.57 0 0 0 4.25 5.15 12.64 12.64 0 0 0 8.07 2.91 4.83 4.83 0 0 1 3.77-2.75A5 5 0 0 0 21 12a5 5 0 0 0-1.41-5.31zM10 15V9l5 3z"/></svg>Voir sur YouTube</a>';
+      } else {
+        wrap.innerHTML = '<div class="video-na">Vidéo non disponible</div>';
+      }
     }
 
     function renderGame(g) {
@@ -187,8 +189,8 @@
         + '<div class="section-block">'
         + '<div class="section-title">🎬 Vidéos</div>'
         + '<div class="videos-grid">'
-        + '<div><div class="video-label">Bande annonce</div><div class="video-wrap" id="video-trailer"><div class="video-na">Chargement...</div></div></div>'
-        + '<div><div class="video-label">Gameplay</div><div class="video-wrap" id="video-gameplay"><div class="video-na">Chargement...</div></div></div>'
+        + '<div><div class="video-label">Bande annonce</div><div class="video-wrap" id="video-trailer" data-query="' + g.name + ' official trailer"><div class="video-na">Chargement...</div></div></div>'
+        + '<div><div class="video-label">Gameplay</div><div class="video-wrap" id="video-gameplay" data-query="' + g.name + ' gameplay PC"><div class="video-na">Chargement...</div></div></div>'
         + '</div>'
         + '</div>'
 
@@ -221,12 +223,12 @@
         if (trailerFixed) {
           setVideoIframe('video-trailer', trailerFixed);
         } else {
-          searchYouTube(g.name + ' official trailer', function(id){ setVideoIframe('video-trailer', id); });
+          setVideoIframe('video-trailer', null, g.name + ' official trailer');
         }
         if (gameplayFixed) {
           setVideoIframe('video-gameplay', gameplayFixed);
         } else {
-          searchYouTube(g.name + ' gameplay footage PC', function(id){ setVideoIframe('video-gameplay', id); });
+          setVideoIframe('video-gameplay', null, g.name + ' gameplay PC');
         }
 
         db.ref('games/' + gameId + '/views').transaction(function(v){ return (v||0)+1; });
