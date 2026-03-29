@@ -130,7 +130,7 @@
       };
     }
 
-    var YT_API_KEY = 'AIzaSyCk0lna6aTZP03UM0WRBA5tmjoIs1KnKKk';
+    var YT_API_KEY = 'AIzaSyBil82PzQVZctvV5mgolWNxvknExLrJeYI';
 
     function ytIdEmbed(v) {
       if (!v) return null;
@@ -140,8 +140,10 @@
     }
 
     function searchYouTube(query, cb) {
-      // Clé YouTube épuisée - on construit une URL de recherche YouTube directe
-      cb(null);
+      fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&videoEmbeddable=true&q=' + encodeURIComponent(query) + '&key=' + YT_API_KEY)
+        .then(function(r){ return r.json(); })
+        .then(function(d){ cb(d.items && d.items.length ? d.items[0].id.videoId : null); })
+        .catch(function(){ cb(null); });
     }
 
     function setVideoIframe(elId, videoId, query) {
@@ -223,12 +225,12 @@
         if (trailerFixed) {
           setVideoIframe('video-trailer', trailerFixed);
         } else {
-          setVideoIframe('video-trailer', null, g.name + ' official trailer');
+          searchYouTube(g.name + ' official trailer', function(id){ setVideoIframe('video-trailer', id, g.name + ' official trailer'); });
         }
         if (gameplayFixed) {
           setVideoIframe('video-gameplay', gameplayFixed);
         } else {
-          setVideoIframe('video-gameplay', null, g.name + ' gameplay PC');
+          searchYouTube(g.name + ' gameplay PC', function(id){ setVideoIframe('video-gameplay', id, g.name + ' gameplay PC'); });
         }
 
         db.ref('games/' + gameId + '/views').transaction(function(v){ return (v||0)+1; });
