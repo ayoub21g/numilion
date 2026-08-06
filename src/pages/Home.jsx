@@ -40,7 +40,7 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('tous');
   const [currentPage, setCurrentPage] = useState(1);
-  const GAMES_PER_PAGE = 20;
+  const GAMES_PER_PAGE = 30;
 
   // Load session
   useEffect(() => {
