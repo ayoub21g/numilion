@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Gamepad2, LogIn, Bell, User, Settings, Shield, X, Send, Check, Trash2 } from 'lucide-react';
+import { Gamepad2, LogIn, Bell, User, Settings, Shield, X, Send, Check, Trash2, Download } from 'lucide-react';
 import { ref, push, get, onValue, update, remove } from 'firebase/database';
 import { db } from '../lib/firebase';
 import './Navbar.css';
@@ -17,9 +17,17 @@ const Navbar = () => {
   const [reqStatus, setReqStatus] = useState('');
   const notifRef = useRef(null);
 
+  const [steamToolsUrl, setSteamToolsUrl] = useState('');
+
   useEffect(() => {
     const s = localStorage.getItem('numilion_session');
     if (s) { try { setSession(JSON.parse(s)); } catch {} }
+    // Charger le lien SteamTools depuis Firebase
+    const stRef = ref(db, 'steamtools/url');
+    const unsub = onValue(stRef, snap => {
+      if (snap.val()) setSteamToolsUrl(snap.val());
+    });
+    return () => unsub();
   }, []);
 
   useEffect(() => {
@@ -118,6 +126,13 @@ const Navbar = () => {
               <Gamepad2 size={18} />
               Demander un jeu
             </button>
+
+            {steamToolsUrl && (
+              <a href={steamToolsUrl} target="_blank" rel="noopener noreferrer" className="btn-steamtools">
+                <img src="https://store.steampowered.com/favicon.ico" alt="" width={16} height={16} style={{borderRadius:3}}/>
+                SteamTools
+              </a>
+            )}
             
             {session ? (
               <div className="user-section">

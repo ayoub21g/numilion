@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ref, onValue, set, update, remove, push } from 'firebase/database';
 import { db } from '../lib/firebase';
-import { Shield, Plus, Trash2, LayoutGrid, Users, Activity, Pencil, Check, X, Mail, UserX, Sparkles, Loader, ShieldCheck, ShieldOff } from 'lucide-react';
+import { Shield, Plus, Trash2, LayoutGrid, Users, Activity, Pencil, Check, X, Mail, UserX, Sparkles, Loader, ShieldCheck, ShieldOff, Wrench } from 'lucide-react';
 import './Admin.css';
 
 const CATS = ['action','fps','rpg','aventure','sport','course','horreur','simulation','strategie','indie'];
@@ -46,6 +46,8 @@ const Admin = () => {
   const [editData, setEditData] = useState({});
   const [activeTab, setActiveTab] = useState('games');
   const [rejectMsg, setRejectMsg] = useState({});
+  const [steamToolsUrl, setSteamToolsUrl] = useState('');
+  const [steamToolsMsg, setSteamToolsMsg] = useState('');
 
   useEffect(() => {
     const s = localStorage.getItem('numilion_session');
@@ -66,7 +68,8 @@ const Admin = () => {
         }
       }),
       onValue(ref(db, 'stats/visits'), snap => setVisits(snap.val() || 0)),
-      onValue(ref(db, 'online'), snap => setOnline(snap.size))
+      onValue(ref(db, 'online'), snap => setOnline(snap.size)),
+      onValue(ref(db, 'steamtools/url'), snap => setSteamToolsUrl(snap.val() || ''))
     ];
     return () => unsubs.forEach(u => u());
   }, [navigate]);
@@ -170,6 +173,15 @@ const Admin = () => {
     await remove(ref(db, `requests/${key}`));
   };
 
+  const saveSteamTools = async (e) => {
+    e.preventDefault();
+    try {
+      await set(ref(db, 'steamtools/url'), steamToolsUrl);
+      setSteamToolsMsg('Lien sauvegardé !');
+      setTimeout(() => setSteamToolsMsg(''), 3000);
+    } catch { setSteamToolsMsg('Erreur.'); }
+  };
+
   const pendingRequests = requests.filter(r => r.status === 'pending');
   const doneRequests = requests.filter(r => r.status !== 'pending');
 
@@ -190,7 +202,7 @@ const Admin = () => {
 
       {/* Tabs */}
       <div className="admin-tabs">
-        {[['games','🕹️ Jeux'],['users','👥 Utilisateurs'],['requests','📬 Demandes']].map(([k,l]) => (
+        {[['games','🕹️ Jeux'],['users','👥 Utilisateurs'],['requests','📬 Demandes'],['steamtools','🔧 SteamTools']].map(([k,l]) => (
           <button key={k} className={`admin-tab-btn ${activeTab===k?'active':''}`} onClick={() => setActiveTab(k)}>
             {l} {k==='requests' && pendingRequests.length > 0 && <span className="tab-badge">{pendingRequests.length}</span>}
           </button>
@@ -364,6 +376,34 @@ const Admin = () => {
           )}
 
           {requests.length === 0 && <p className="empty-msg">Aucune demande.</p>}
+        </div>
+      )}
+
+      {/* STEAMTOOLS */}
+      {activeTab === 'steamtools' && (
+        <div className="admin-section glass-panel" style={{maxWidth:600}}>
+          <div className="section-header"><Wrench size={20} className="text-gradient"/><h2>SteamTools</h2></div>
+          <p style={{color:'var(--text-muted)',fontSize:'0.9rem',marginBottom:20}}>
+            Mets ici le lien de téléchargement de SteamTools. Il apparaîtra comme bouton dans la navbar pour tous les visiteurs.
+          </p>
+          <form className="admin-form" onSubmit={saveSteamTools}>
+            <div className="form-group">
+              <label>Lien de téléchargement</label>
+              <input
+                type="text"
+                value={steamToolsUrl}
+                onChange={e => setSteamToolsUrl(e.target.value)}
+                placeholder="https://github.com/.../SteamTools.zip"
+              />
+            </div>
+            {steamToolsUrl && (
+              <div style={{padding:'12px 16px',background:'rgba(23,107,185,0.1)',border:'1px solid rgba(23,107,185,0.3)',borderRadius:12,fontSize:'0.85rem',color:'#5bb8f5'}}>
+                Aperçu : <a href={steamToolsUrl} target="_blank" rel="noopener noreferrer" style={{color:'#5bb8f5'}}>{steamToolsUrl}</a>
+              </div>
+            )}
+            <button type="submit" className="btn-primary" style={{marginTop:10}}>Sauvegarder</button>
+            {steamToolsMsg && <div className="admin-message">{steamToolsMsg}</div>}
+          </form>
         </div>
       )}
     </div>
