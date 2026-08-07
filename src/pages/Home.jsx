@@ -117,20 +117,22 @@ const Home = () => {
           />
         </div>
         
-        <div className="categories-wrapper">
-          {CATEGORIES.map(cat => {
-            const Icon = cat.icon;
-            return (
-              <button 
-                key={cat.id}
-                className={`category-btn ${activeCategory === cat.id ? 'active' : ''}`}
-                onClick={() => handleCategory(cat.id)}
-              >
-                <Icon size={16} />
-                {cat.label}
-              </button>
-            )
-          })}
+        <div className="categories-scroll-container">
+          <div className="categories-wrapper">
+            {CATEGORIES.map(cat => {
+              const Icon = cat.icon;
+              return (
+                <button 
+                  key={cat.id}
+                  className={`category-btn ${activeCategory === cat.id ? 'active' : ''}`}
+                  onClick={() => handleCategory(cat.id)}
+                >
+                  <Icon size={16} />
+                  {cat.label}
+                </button>
+              )
+            })}
+          </div>
         </div>
       </section>
 
