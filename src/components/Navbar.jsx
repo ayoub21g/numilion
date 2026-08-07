@@ -117,7 +117,7 @@ const Navbar = () => {
       <nav className="navbar glass-panel">
         <div className="navbar-inner">
           <Link to="/" className="navbar-brand">
-            <img src="standard-2.gif" alt="Numilion Logo" className="navbar-logo" />
+            <img src="/numilion/logo.gif" alt="Numilion Logo" className="navbar-logo" />
             <span className="brand-font text-gradient" style={{ fontWeight: 800, fontSize: '1.4rem' }}>Numilion</span>
           </Link>
           
