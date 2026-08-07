@@ -119,23 +119,36 @@ const Admin = () => {
   };
 
   const deleteUser = async (username) => {
+    if (!username) return;
     if (window.confirm(`Supprimer l'utilisateur "${username}" ?`)) {
       await remove(ref(db, `users/${username}`));
       await remove(ref(db, `notifications/${username}`));
+      // Ne pas supprimer de admins/ pour éviter de casser les comptes admin
     }
   };
 
   const toggleAdmin = async (u) => {
+    const username = u.user;
+    if (!username) return;
     const isAdmin = u.role === 'admin';
     const newRole = isAdmin ? 'user' : 'admin';
     const action = isAdmin ? 'retirer les droits admin de' : 'promouvoir en admin';
-    if (!window.confirm(`Voulez-vous ${action} "${u.user}" ?`)) return;
-    await update(ref(db, `users/${u.user}`), { role: newRole });
+    if (!window.confirm(`Voulez-vous ${action} "${username}" ?`)) return;
+
+    // Mettre à jour dans users/
+    await update(ref(db, `users/${username}`), { role: newRole });
+
+    // Si l'utilisateur est aussi dans admins/, mettre à jour là aussi
+    const adminSnap = await import('firebase/database').then(({ get }) => get(ref(db, `admins/${username}`)));
+    if (adminSnap.exists()) {
+      await update(ref(db, `admins/${username}`), { role: newRole });
+    }
+
     // Mettre à jour la session locale si c'est l'utilisateur connecté
     const s = localStorage.getItem('numilion_session');
     if (s) {
       const parsed = JSON.parse(s);
-      if (parsed.user === u.user) {
+      if (parsed.user === username) {
         localStorage.setItem('numilion_session', JSON.stringify({ ...parsed, role: newRole }));
       }
     }

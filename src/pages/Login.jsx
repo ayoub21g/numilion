@@ -40,10 +40,13 @@ const Login = () => {
         
         if (adminSnap.exists() && adminSnap.val().pass === password) {
           const adminData = adminSnap.val();
+          // Vérifier aussi dans users/ si le rôle a été modifié depuis le panel
+          const userSnap = await get(ref(db, `users/${username}`));
+          const role = userSnap.exists() ? (userSnap.val().role || 'admin') : 'admin';
           localStorage.setItem('numilion_session', JSON.stringify({
-            user: adminData.user,
-            avatar: adminData.avatar || null,
-            role: 'admin'
+            user: adminData.user || username,
+            avatar: adminData.avatar || (userSnap.exists() ? userSnap.val().avatar : null) || null,
+            role: role
           }));
           navigate(redirect);
           setTimeout(() => window.location.reload(), 50);
@@ -55,7 +58,6 @@ const Login = () => {
         } else {
           const userData = snapshot.val();
           if (userData.pass === password) {
-            // Success
             localStorage.setItem('numilion_session', JSON.stringify({
               user: userData.user,
               avatar: userData.avatar || null,
